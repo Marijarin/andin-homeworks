@@ -74,15 +74,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun likeById(id: Long) {
         thread {
-            repository.likeById(id)
-            loadPosts()
+            val likedPost = repository.likeById(id)
+            val newPosts = _data.value?.posts.orEmpty().map{ if (it.id == id) likedPost else it }
+            _data.postValue(FeedModel(posts = newPosts))
         }
 
     }
     fun unlikeById(id: Long) {
         thread {
-            repository.unlikeById(id)
-            loadPosts()
+            val unlikedPost = repository.unlikeById(id)
+            val newPosts = _data.value?.posts.orEmpty().map{ if (it.id == id) unlikedPost else it }
+            _data.postValue(FeedModel(posts = newPosts))
         }
 
     }

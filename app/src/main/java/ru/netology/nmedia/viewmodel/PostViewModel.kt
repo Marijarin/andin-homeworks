@@ -12,11 +12,13 @@ import ru.netology.nmedia.util.SingleLiveEvent
 
 private val empty = Post(
     id = 0,
-    content = "",
     author = "",
+    authorAvatar = "",
+    content = "",
+    published = "",
     likedByMe = false,
     likes = 0,
-    published = ""
+    attachment = null
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
@@ -52,7 +54,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value?.let {
             repository.save(it, object : PostRepository.Callback <Post>{
                 override fun onSuccess(value: Post) {
-                    _postCreated
+                    _postCreated.postValue(Unit)
                 }
                 override fun onError(e: Exception) {
                     _data.postValue(FeedModel(error = true))

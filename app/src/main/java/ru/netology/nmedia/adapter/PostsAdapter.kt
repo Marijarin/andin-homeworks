@@ -6,6 +6,7 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -20,8 +21,11 @@ interface OnInteractionListener {
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
 ) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+
+
         return PostViewHolder(binding, onInteractionListener)
     }
 
@@ -36,6 +40,10 @@ class PostViewHolder(
     private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    companion object {
+        private const val BASE_URL = "http://10.0.2.2:9999"
+
+    }
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
@@ -44,6 +52,24 @@ class PostViewHolder(
             // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+
+            Glide.with(avatar)
+                .load("${BASE_URL}/avatars/${post.authorAvatar}")
+                .circleCrop()
+                .placeholder(R.drawable.ic_loading_24)
+                .error(R.drawable.ic_error_24)
+                .timeout(10_000)
+                .into(avatar)
+
+            if (post.attachment!=null){
+                Glide.with(attachment)
+                    .load("${BASE_URL}/images/${post.attachment.url}")
+                    .override(1800, 700)
+                    .placeholder(R.drawable.ic_loading_24)
+                    .error(R.drawable.ic_error_24)
+                    .timeout(10_000)
+                    .into(attachment)
+            }
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

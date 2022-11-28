@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import okhttp3.internal.notify
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -44,6 +45,7 @@ class PostViewHolder(
         private const val BASE_URL = "http://10.0.2.2:9999"
 
     }
+
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
@@ -53,6 +55,7 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
+
             Glide.with(avatar)
                 .load("${BASE_URL}/avatars/${post.authorAvatar}")
                 .circleCrop()
@@ -61,14 +64,16 @@ class PostViewHolder(
                 .timeout(10_000)
                 .into(avatar)
 
-            if (post.attachment!=null){
-                Glide.with(attachment)
-                    .load("${BASE_URL}/images/${post.attachment.url}")
-                    .override(1800, 700)
-                    .placeholder(R.drawable.ic_loading_24)
-                    .error(R.drawable.ic_error_24)
-                    .timeout(10_000)
-                    .into(attachment)
+            attachment.let {
+                if (post.attachment != null) {
+                    Glide.with(attachment)
+                        .load("${BASE_URL}/images/${post.attachment.url}")
+                        .override(1800, 700)
+                        .placeholder(R.drawable.ic_loading_24)
+                        .error(R.drawable.ic_error_24)
+                        .timeout(10_000)
+                        .into(attachment)
+                }
             }
 
             menu.setOnClickListener {

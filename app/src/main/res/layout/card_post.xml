@@ -90,18 +90,11 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/common_spacing"
             android:contentDescription="@string/post_image"
-            app:layout_constraintBottom_toBottomOf="@id/footer"
+
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/content"
             tools:srcCompat="@sample/posts.json/data/attachment" />
-
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/footer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="content" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/like"
@@ -110,7 +103,7 @@
             android:checkable="true"
             android:contentDescription="@string/description_post_like"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/footer"
+            app:layout_constraintTop_toBottomOf="@id/attachment"
             app:icon="@drawable/ic_like_24dp"
             tools:checked="@sample/posts.json/data/likedByMe"
             tools:text="@sample/posts.json/data/likes"
@@ -124,7 +117,7 @@
             android:layout_marginStart="@dimen/common_spacing"
             android:contentDescription="@string/description_post_share"
             app:layout_constraintStart_toEndOf="@+id/like"
-            app:layout_constraintTop_toBottomOf="@id/footer"
+            app:layout_constraintTop_toBottomOf="@id/attachment"
             app:icon="@drawable/ic_share_24"
             style="@style/Widget.AppTheme.IconButton"
             />

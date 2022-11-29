@@ -3,6 +3,7 @@ package ru.netology.nmedia.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -68,13 +69,14 @@ class PostViewHolder(
                 if (post.attachment != null) {
                     Glide.with(attachment)
                         .load("${BASE_URL}/images/${post.attachment.url}")
-                        .override(1800, 700)
+                        //.override(1800, 700)
                         .placeholder(R.drawable.ic_loading_24)
                         .error(R.drawable.ic_error_24)
                         .timeout(10_000)
                         .into(attachment)
                 }
             }
+            attachment.isVisible = post.attachment != null
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

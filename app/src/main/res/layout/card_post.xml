@@ -87,7 +87,7 @@
         <ImageView
             android:id="@+id/attachment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="240dp"
             android:layout_marginBottom="@dimen/common_spacing"
             android:contentDescription="@string/post_image"
 

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import okhttp3.internal.notify
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -69,7 +68,6 @@ class PostViewHolder(
                 if (post.attachment != null) {
                     Glide.with(attachment)
                         .load("${BASE_URL}/images/${post.attachment.url}")
-                        //.override(1800, 700)
                         .placeholder(R.drawable.ic_loading_24)
                         .error(R.drawable.ic_error_24)
                         .timeout(10_000)

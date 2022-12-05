@@ -5,11 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -33,7 +36,10 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                if (!post.likedByMe) viewModel.likeById(post.id) else if (post.likedByMe) viewModel.unlikeById(
+                    post.id
+                )
+
             }
 
             override fun onRemove(post: Post) {
@@ -52,12 +58,32 @@ class FeedFragment : Fragment() {
                 startActivity(shareIntent)
             }
         })
+
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
             binding.progress.isVisible = state.loading
             binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
+            binding.contentView.isRefreshing = false
+
+        }
+        viewModel.edited.observe(viewLifecycleOwner) { post ->
+            if (post.id == 0L) {
+                return@observe
+            }
+            findNavController()
+                .navigate(R.id.action_feedFragment_to_newPostFragment, Bundle().apply {
+                    textArg = post.content
+                })
+
+        }
+        viewModel.errorLike.observe(viewLifecycleOwner) {
+            Snackbar
+                .make(binding.list, "Like failure. Check your internet connection", Snackbar.LENGTH_SHORT)
+                .setBackgroundTint(ContextCompat.getColor(this.requireContext(),R.color.colorDark))
+                .setTextColor(ContextCompat.getColor(this.requireContext(),R.color.colorLight))
+                .show()
         }
 
         binding.retryButton.setOnClickListener {
@@ -66,6 +92,9 @@ class FeedFragment : Fragment() {
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+        }
+        binding.contentView.setOnRefreshListener {
+            viewModel.loadPosts()
         }
 
         return binding.root

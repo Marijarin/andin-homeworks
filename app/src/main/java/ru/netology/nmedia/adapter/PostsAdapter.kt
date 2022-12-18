@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModelState
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -55,6 +56,8 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
+            statusDone.isVisible = !post.saved
+            statusSaved.isVisible = post.saved
 
             Glide.with(avatar)
                 .load("${BASE_URL}/avatars/${post.authorAvatar}")
@@ -97,7 +100,9 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                onInteractionListener.onLike(post)
+                if (post.saved) {
+                    onInteractionListener.onLike(post)
+                } else like.isChecked = false
             }
 
             share.setOnClickListener {

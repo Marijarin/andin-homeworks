@@ -12,15 +12,15 @@ interface PostDao {
     fun getAll(): LiveData<List<PostEntity>>
 
     @Insert
-    fun insert(post: PostEntity)
+    suspend fun insert(post: PostEntity)
 
     @Insert
-    fun insert(posts: List<PostEntity>)
+    suspend fun insert(posts: List<PostEntity>)
 
     @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
-    fun updateContentById(id: Long, content: String)
+    suspend fun updateContentById(id: Long, content: String)
 
-    fun save(post: PostEntity) =
+    suspend fun save(post: PostEntity) =
         if (post.id == 0L) insert(post) else updateContentById(post.id, post.content)
 
     @Query("""
@@ -29,8 +29,8 @@ interface PostDao {
         likedByMe = CASE WHEN likedByMe THEN 0 ELSE 1 END
         WHERE id = :id
         """)
-    fun likeById(id: Long)
+    suspend fun likeById(id: Long)
 
     @Query("DELETE FROM PostEntity WHERE id = :id")
-    fun removeById(id: Long)
+    suspend fun removeById(id: Long)
 }

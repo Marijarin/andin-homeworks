@@ -6,31 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activity.NewPostFragment">
 
-    <Button
-        android:id="@+id/errorSave"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/save_error"
-        android:layout_marginStart="@dimen/common_spacing"
-        android:layout_marginEnd="@dimen/common_spacing"
-        android:layout_gravity="top"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-
-
-        />
-    <Button
-        android:id="@+id/retryButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/retry_loading"
-        android:layout_gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-
-        />
-
     <EditText
         android:id="@+id/edit"
         android:layout_width="match_parent"
@@ -38,8 +13,7 @@
         android:background="@android:color/transparent"
         android:gravity="start|top"
         android:inputType="textMultiLine"
-        app:layout_anchor="@+id/retryButton"
-        app:layout_anchorGravity="top|center" />
+        />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"

@@ -28,6 +28,9 @@
         <item name="snackbarButtonStyle">@color/colorDark</item>
         <item name="snackbarTextViewStyle">@color/colorLight</item>
     </style>
+    <style name="Widget.AppTheme.SavedStyle" parent="Widget.MaterialComponents.Button.TextButton.Icon">
+        <item name="checkedIconTint">@color/icon_saved_tint</item>
+    </style>
 
 
 </resources>

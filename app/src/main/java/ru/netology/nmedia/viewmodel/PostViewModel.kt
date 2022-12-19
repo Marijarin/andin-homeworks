@@ -2,6 +2,9 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
@@ -29,17 +32,24 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
    val data: LiveData<FeedModel>
         get() = repository.data.map {
             FeedModel(it, it.isEmpty())
-        }
+        }.asLiveData(Dispatchers.Default)
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
     get() = _dataState
+
+    val newerCount: LiveData<Int> = data.switchMap {
+        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+            .catch { e -> e.printStackTrace() }
+            .asLiveData(Dispatchers.Default)
+    }
+
     val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
-    private val _error = SingleLiveEvent<Throwable>()
+   /* private val _error = SingleLiveEvent<Throwable>()
     val error: LiveData<Throwable>
-        get() = _error
+        get() = _error*/
 
     init {
         loadPosts()
@@ -61,7 +71,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             repository.getAll()
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception){
-            _error.value = e
+            //_error.value = e
             _dataState.value = FeedModelState.Error
         }
     }
@@ -75,7 +85,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     repository.save(it)
                     _dataState.value = FeedModelState.Idle
                 } catch (e: Exception) {
-                    _error.value = e
+                    //_error.value = e
                     _dataState.value = FeedModelState.Error
                 }
             }
@@ -102,7 +112,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             repository.likeById(id)
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception) {
-            _error.value = e
+            //_error.value = e
+            _dataState.value = FeedModelState.Error
+        }
+    }
+    fun unlikeById(id: Long) = viewModelScope.launch{
+        try {
+            _dataState.value = FeedModelState.Refreshing
+            repository.unlikeById(id)
+            _dataState.value = FeedModelState.Idle
+        } catch (e: Exception) {
+            //_error.value = e
             _dataState.value = FeedModelState.Error
         }
     }
@@ -113,7 +133,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             repository.removeById(id)
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception) {
-            _error.value = e
+            //_error.value = e
             _dataState.value = FeedModelState.Error
         }
     }

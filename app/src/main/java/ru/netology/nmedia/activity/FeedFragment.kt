@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -37,7 +36,9 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                if (!post.likedByMe) viewModel.likeById(post.id) else if (post.likedByMe) viewModel.unlikeById(
+                    post.id
+                )
             }
 
             override fun onRemove(post: Post) {
@@ -66,11 +67,11 @@ class FeedFragment : Fragment() {
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state is FeedModelState.Loading
             binding.contentView.isRefreshing = state is FeedModelState.Refreshing
-            /*if (state is FeedModelState.Error) {
+            if (state is FeedModelState.Error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) { viewModel.refresh() }
                     .show()
-            }*/
+            }
         }
         viewModel.edited.observe(viewLifecycleOwner) { post ->
             if (post.id == 0L) {
@@ -82,7 +83,11 @@ class FeedFragment : Fragment() {
                 })
 
         }
-        viewModel.error.observe(viewLifecycleOwner) {
+
+        viewModel.newerCount.observe(viewLifecycleOwner){
+            println("Newer count *** $it")
+        }
+        /*viewModel.error.observe(viewLifecycleOwner) {
             Snackbar
                 .make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                 .setAction(R.string.retry_loading) {
@@ -91,7 +96,7 @@ class FeedFragment : Fragment() {
                 .setBackgroundTint(ContextCompat.getColor(this.requireContext(), R.color.colorDark))
                 .setTextColor(ContextCompat.getColor(this.requireContext(), R.color.colorLight))
                 .show()
-        }
+        }*/
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)

@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
     </style>
 
     <style name="Widget.AppTheme.IconButton" parent="Widget.MaterialComponents.Button.TextButton.Icon">
@@ -23,5 +24,13 @@
         <item name="android:minWidth">@dimen/icon_button_min_size</item>
         <item name="android:minHeight">@dimen/icon_button_min_size</item>
     </style>
+    <style name="SnackBarStyle" parent="Widget.MaterialComponents.Snackbar">
+        <item name="snackbarButtonStyle">@color/colorDark</item>
+        <item name="snackbarTextViewStyle">@color/colorLight</item>
+    </style>
+    <style name="Widget.AppTheme.SavedStyle" parent="Widget.MaterialComponents.Button.TextButton.Icon">
+        <item name="checkedIconTint">@color/icon_saved_tint</item>
+    </style>
+
 
 </resources>

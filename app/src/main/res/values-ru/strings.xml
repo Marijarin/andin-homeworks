@@ -21,4 +21,9 @@
     <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
     <string name="channel_remote_name">Уведомления с сервера</string>
     <string name="channel_remote_description">Уведомления с удалённого сервера</string>
+    <string name="post_image">Изображение к посту</string>
+    <string name="like_error">Не удалось нажать кнопку. Попробуйте еще раз</string>
+    <string name="save_error">Не удалось сохранить пост</string>
+    <string name="saved">Сохранено на сервере</string>
+    <string name="done">Сохранено в офлайн формате</string>
 </resources>

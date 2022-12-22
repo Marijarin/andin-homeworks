@@ -24,12 +24,30 @@
         <item name="android:minWidth">@dimen/icon_button_min_size</item>
         <item name="android:minHeight">@dimen/icon_button_min_size</item>
     </style>
+
     <style name="SnackBarStyle" parent="Widget.MaterialComponents.Snackbar">
-        <item name="snackbarButtonStyle">@color/colorDark</item>
+        <item name="snackbarButtonStyle">@color/icon_saved_tint</item>
         <item name="snackbarTextViewStyle">@color/colorLight</item>
     </style>
+
     <style name="Widget.AppTheme.SavedStyle" parent="Widget.MaterialComponents.Button.TextButton.Icon">
         <item name="checkedIconTint">@color/icon_saved_tint</item>
+    </style>
+
+    <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Button</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.App.SmallComponent</item>
+    </style>
+
+    <style name="ThemeOverlay.App.Button" parent="">
+        <item name="colorPrimary">@color/icon_saved_tint</item>
+        <item name="colorOnPrimary">@color/colorLight</item>
+    </style>
+
+
+    <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">40dp</item>
     </style>
 
 

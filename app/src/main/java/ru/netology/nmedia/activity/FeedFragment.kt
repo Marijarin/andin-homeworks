@@ -5,10 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
@@ -57,7 +60,7 @@ class FeedFragment : Fragment() {
                 startActivity(shareIntent)
             }
         })
-
+        binding.newerPosts.visibility = View.GONE
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
@@ -84,8 +87,11 @@ class FeedFragment : Fragment() {
 
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner){
-            println("Newer count *** $it")
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            println("Newer count ** $it")
+            if (it > 0) {
+                binding.newerPosts.isVisible = true
+            } else binding.newerPosts.visibility = View.GONE
         }
         /*viewModel.error.observe(viewLifecycleOwner) {
             Snackbar
@@ -97,6 +103,18 @@ class FeedFragment : Fragment() {
                 .setTextColor(ContextCompat.getColor(this.requireContext(), R.color.colorLight))
                 .show()
         }*/
+
+        binding.newerPosts.setOnClickListener {
+            adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver(){
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {
+                        binding.list.smoothScrollToPosition(0)
+                    }
+                }
+            })
+            viewModel.update()
+            binding.newerPosts.isGone = true
+        }
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)

@@ -47,7 +47,7 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            postDao.insert(body.map { it.copy(saved = true) }.toEntity())
+            postDao.insert(body.map { it.copy(saved = true) }.toEntity(false))
             emit(body.size)
         }
     }
@@ -78,9 +78,9 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
         try {
             postDao.removeById(id)
             val response = PostsApi.retrofitService.removeById(id)
-                if (!response.isSuccessful) {
-                    throw ApiError(response.code(), response.message())
-                }
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -97,35 +97,36 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             }
         } catch (e: IOException) {
             throw NetworkError
-        } catch (e: Exception){
+        } catch (e: Exception) {
             throw  UnknownError
         }
     }
 
     override suspend fun unlikeById(id: Long) {
-                    try {
-                postDao.likeById(id)
-                val response = PostsApi.retrofitService.unlikeById(id)
-                if (!response.isSuccessful) {
-                    throw ApiError(response.code(), response.message())
-                }
-            } catch (e: IOException) {
-                throw NetworkError
-            } catch (e: Exception){
-                throw  UnknownError
+        try {
+            postDao.likeById(id)
+            val response = PostsApi.retrofitService.unlikeById(id)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
             }
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw  UnknownError
         }
+    }
 
 
     override suspend fun checkNotSaved() {
         data.asLiveData().value?.forEach {
-            if (it.id >= idDone){
-                try{
+            if (it.id >= idDone) {
+                try {
                     val response = PostsApi.retrofitService.save(it.copy(id = 0L))
                     if (!response.isSuccessful) {
                         throw ApiError(response.code(), response.message())
                     }
-                    val newPost = response.body() ?: throw ApiError(response.code(), response.message())
+                    val newPost =
+                        response.body() ?: throw ApiError(response.code(), response.message())
                     postDao.removeById(it.id)
                     postDao.insert(PostEntity.fromDto(newPost.copy(saved = true)))
                 } catch (e: IOException) {
@@ -134,6 +135,16 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
                     throw UnknownError
                 }
             }
+        }
+    }
+
+    override suspend fun update() {
+        try{
+        postDao.update()
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw  UnknownError
         }
     }
 

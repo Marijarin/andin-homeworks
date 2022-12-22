@@ -6,6 +6,9 @@
     <string name="description_post_like">Like</string>
     <string name="description_post_share">Share</string>
     <string name="description_post_save">Save</string>
+    <string name="description_photo">It is a photo</string>
+    <string name="description_select_photo">Select a photo</string>
+    <string name="description_take_photo">Take a photo</string>
     <string name="menu_remove">Remove</string>
     <string name="post_text">Post Text</string>
     <string name="post_image">Post Image</string>
@@ -25,4 +28,7 @@
     <string name="channel_remote_description">Notifications from remote server</string>
     <string name="saved">Saved on server</string>
     <string name="done">Saved offline</string>
+    <string name="newer_posts_button">Recent posts</string>
+    <string name="description_newer_posts_button">Recent posts that have not been read</string>
+    <string name="remove">Remove</string>
 </resources>

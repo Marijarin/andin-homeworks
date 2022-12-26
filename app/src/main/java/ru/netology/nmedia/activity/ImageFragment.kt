@@ -66,7 +66,7 @@ class ImageFragment : Fragment() {
         }
 
         Glide.with(binding.photo)
-            .load("http://10.0.2.2:9999/${arguments?.textArg}")
+            .load("http://10.0.2.2:9999/media/${arguments?.textArg}")
             .placeholder(R.drawable.ic_loading_24)
             .error(R.drawable.ic_error_24)
             .timeout(10_000)

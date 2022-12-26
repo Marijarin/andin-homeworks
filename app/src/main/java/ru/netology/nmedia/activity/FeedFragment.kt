@@ -61,10 +61,10 @@ class FeedFragment : Fragment() {
             }
 
             override fun onImage(post: Post) {
+                viewModel.getById(post.id)
                 findNavController().navigate(
-                    R.id.action_feedFragment_to_imageFragment, Bundle().apply {
-                        textArg = post.attachment?.url
-                    })
+                    R.id.action_feedFragment_to_imageFragment
+                )
             }
         })
         binding.newerPosts.visibility = View.GONE
@@ -104,7 +104,7 @@ class FeedFragment : Fragment() {
         }
 
         binding.newerPosts.setOnClickListener {
-            adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver(){
+            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (positionStart == 0) {
                         binding.list.smoothScrollToPosition(0)

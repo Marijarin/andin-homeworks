@@ -32,4 +32,6 @@
     <string name="description_photo">Это фотография</string>
     <string name="description_select_photo">Выберите фотографию</string>
     <string name="description_take_photo">Сделайте снимок</string>
+    <string name="description_description_backwards">Вернуться</string>
+    <string name="description_backwards">Вернуться</string>
 </resources>

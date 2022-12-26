@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -7,12 +8,16 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 
 interface PostsApiService {
 
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
+
+    @GET("posts/{id}")
+    suspend fun getById(@Path("id") id: Long): Response<Post>
 
     @GET("posts/{id}/newer")
     suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
@@ -28,6 +33,10 @@ interface PostsApiService {
 
     @DELETE("posts/{id}")
     suspend fun removeById(@Path("id") id: Long): Response<Unit>
+
+    @Multipart
+    @POST("media")
+    suspend fun upload(@Part file: MultipartBody.Part): Response<Media>
 }
 
 object PostsApi {
@@ -35,7 +44,7 @@ object PostsApi {
 
     private val logging = HttpLoggingInterceptor().apply{
         if (BuildConfig.DEBUG){
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.HEADERS
         }
     }
 

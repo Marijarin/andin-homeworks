@@ -56,6 +56,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val postCreated: LiveData<Unit>
         get() = _postCreated
 
+
     init {
         loadPosts()
     }
@@ -86,7 +87,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    repository.save(it)
+                    when(_photo.value){
+                        noPhoto ->  repository.save(it)
+                        else -> _photo.value?.file?.let{ file ->
+                            repository.saveWithAttachment(it, file)
+                        }
+                    }
                     _dataState.value = FeedModelState.Idle
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState.Error
@@ -149,6 +155,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun changePhoto(uri: Uri?, file: File?) {
         _photo.value = PhotoModel(uri, file)
+    }
+
+    fun getById(id: Long) = viewModelScope.launch{
+        try{
+            _dataState.value = FeedModelState.Loading
+            repository.getById(id)
+            _dataState.value = FeedModelState.Idle
+        }catch (e: Exception) {
+            _dataState.value = FeedModelState.Error
+        }
+
     }
 
 

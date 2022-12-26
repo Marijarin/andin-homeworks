@@ -90,7 +90,6 @@
             android:layout_height="240dp"
             android:layout_marginBottom="@dimen/common_spacing"
             android:contentDescription="@string/post_image"
-
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/content"

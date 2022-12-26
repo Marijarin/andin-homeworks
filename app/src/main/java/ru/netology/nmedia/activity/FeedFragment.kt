@@ -59,9 +59,18 @@ class FeedFragment : Fragment() {
                     Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
             }
+
+            override fun onImage(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_imageFragment, Bundle().apply {
+                        textArg = post.attachment?.url
+                    })
+            }
         })
         binding.newerPosts.visibility = View.GONE
+
         binding.list.adapter = adapter
+
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
             binding.emptyText.isVisible = state.empty
@@ -93,16 +102,6 @@ class FeedFragment : Fragment() {
                 binding.newerPosts.isVisible = true
             } else binding.newerPosts.visibility = View.GONE
         }
-        /*viewModel.error.observe(viewLifecycleOwner) {
-            Snackbar
-                .make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                .setAction(R.string.retry_loading) {
-                   viewModel.refresh()
-                }
-                .setBackgroundTint(ContextCompat.getColor(this.requireContext(), R.color.colorDark))
-                .setTextColor(ContextCompat.getColor(this.requireContext(), R.color.colorLight))
-                .show()
-        }*/
 
         binding.newerPosts.setOnClickListener {
             adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver(){
@@ -125,4 +124,5 @@ class FeedFragment : Fragment() {
 
         return binding.root
     }
+
 }

@@ -101,7 +101,10 @@ class ImageFragment : Fragment() {
                 menu.isGone = true
                 statusSaved.isGone = true
                 constraint.setBackgroundColor(Color.BLACK)
-                attachment.background
+                attachment.adjustViewBounds = true
+                attachment.maxHeight
+                attachment.maxWidth
+                
             }
 
         }

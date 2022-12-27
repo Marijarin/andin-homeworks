@@ -9,18 +9,15 @@
         android:id="@+id/photoContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#000000"
         app:layout_constraintBottom_toTopOf="@id/divider">
 
-        <ImageView
-            android:id="@+id/background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#000000"
-            android:contentDescription="@string/description_photo" />
+
 
         <include
             android:id="@+id/postLayout"
-            layout="@layout/card_post" />
+            layout="@layout/card_post"
+            android:gravity="fill_horizontal"/>
 
     </FrameLayout>
 

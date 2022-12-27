@@ -16,5 +16,5 @@ interface PostRepository {
     suspend fun checkNotSaved()
     suspend fun update()
     suspend fun saveWithAttachment(post: Post, file: File)
-    suspend fun getById(id: Long): Post
+
 }

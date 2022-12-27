@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
-import retrofit2.Response
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
@@ -157,7 +156,7 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             val data = MultipartBody.Part.createFormData(
                 "file",
                 file.name,
-                file.asRequestBody()
+                file.asRequestBody()    
             )
             val response = PostsApi.retrofitService.upload(data)
             if (!response.isSuccessful) {
@@ -177,16 +176,6 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             val upload = upload(file)
             val postWithAttachment = post.copy(attachment = Attachment(upload.id))
             save(postWithAttachment)
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw  UnknownError
-        }
-    }
-
-    override suspend fun getById(id: Long): Post {
-        try {
-            return postDao.getById(id).toDto()
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {

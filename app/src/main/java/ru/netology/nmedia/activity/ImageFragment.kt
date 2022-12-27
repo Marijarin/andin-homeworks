@@ -2,6 +2,7 @@ package ru.netology.nmedia.activity
 
 import android.content.Intent
 import android.graphics.Color
+import android.media.AudioRecord.MetricsConstants.SOURCE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
@@ -50,25 +52,6 @@ class ImageFragment : Fragment() {
         )
         imageFragmentBinding = binding
 
-        val viewHolder = PostViewHolder(binding.postLayout, object : OnInteractionListener {
-
-            override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
-            }
-
-            override fun onShare(post: Post) {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, post.content)
-                    type = "text/plain"
-                }
-
-                val shareIntent =
-                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
-                startActivity(shareIntent)
-            }
-        })
-
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             if (state is FeedModelState.Error) {
                 Snackbar
@@ -90,31 +73,12 @@ class ImageFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        viewModel.onePost.observe(viewLifecycleOwner) {
-
-            viewHolder.bind(it)
-            binding.postLayout.apply {
-                content.isGone = true
-                author.isGone = true
-                avatar.isGone = true
-                published.isGone = true
-                menu.isGone = true
-                statusSaved.isGone = true
-                constraint.setBackgroundColor(Color.BLACK)
-                attachment.adjustViewBounds = true
-                attachment.maxHeight
-                attachment.maxWidth
-                
-            }
-
-        }
-
-        /*Glide.with(binding.photo)
+        Glide.with(binding.photo)
             .load("http://10.0.2.2:9999/media/${arguments?.textArg}")
             .placeholder(R.drawable.ic_loading_24)
             .error(R.drawable.ic_error_24)
             .timeout(10_000)
-            .into(binding.photo)*/
+            .into(binding.photo)
 
         return binding.root
     }

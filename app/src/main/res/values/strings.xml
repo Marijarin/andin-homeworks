@@ -32,4 +32,8 @@
     <string name="newer_posts_button">Recent posts</string>
     <string name="description_newer_posts_button">Recent posts that have not been read</string>
     <string name="remove">Remove</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_out">Sign out</string>
+
 </resources>

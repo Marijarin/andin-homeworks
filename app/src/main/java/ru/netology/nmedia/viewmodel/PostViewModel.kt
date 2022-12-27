@@ -45,11 +45,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val photo: LiveData<PhotoModel>
     get() = _photo
 
-    private val _onePost = MutableLiveData<Post>(empty)
-    val onePost: LiveData<Post>
-    get() = _onePost
-
-    val newerCount: LiveData<Int> = data.switchMap {
+   val newerCount: LiveData<Int> = data.switchMap {
         repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
             .catch { e -> e.printStackTrace() }
             .asLiveData(Dispatchers.Default)
@@ -161,16 +157,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _photo.value = PhotoModel(uri, file)
     }
 
-    fun getById(id: Long) = viewModelScope.launch{
-        try{
-            _dataState.value = FeedModelState.Loading
-            _onePost.value = repository.getById(id)
-            _dataState.value = FeedModelState.Idle
-        }catch (e: Exception) {
-            _dataState.value = FeedModelState.Error
-        }
 
-    }
 
 
 }

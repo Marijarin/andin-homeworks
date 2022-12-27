@@ -61,10 +61,10 @@ class FeedFragment : Fragment() {
             }
 
             override fun onImage(post: Post) {
-                viewModel.getById(post.id)
                 findNavController().navigate(
-                    R.id.action_feedFragment_to_imageFragment
-                )
+                    R.id.action_feedFragment_to_imageFragment, Bundle().apply {
+                        textArg = post.attachment?.url
+                    })
             }
         })
         binding.newerPosts.visibility = View.GONE

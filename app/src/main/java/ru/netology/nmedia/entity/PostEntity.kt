@@ -21,8 +21,7 @@ data class PostEntity(
     var attachment: AttachmentEmbeddable?,
     val saved: Boolean,
     val show: Boolean = true,
-
-
+    val authorId: Long = 0,
 ) {
     fun toDto() = Post(
         id,
@@ -33,7 +32,8 @@ data class PostEntity(
         likedByMe,
         likes,
         attachment?.toDto(),
-        saved
+        saved,
+        authorId = authorId
     )
 
     companion object {
@@ -48,6 +48,7 @@ data class PostEntity(
                 dto.likes,
                 AttachmentEmbeddable.fromDto(dto.attachment),
                 dto.saved,
+                authorId = dto.authorId
             )
     }
 }

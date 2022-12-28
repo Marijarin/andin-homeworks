@@ -156,7 +156,7 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             val data = MultipartBody.Part.createFormData(
                 "file",
                 file.name,
-                file.asRequestBody()    
+                file.asRequestBody()
             )
             val response = PostsApi.retrofitService.upload(data)
             if (!response.isSuccessful) {

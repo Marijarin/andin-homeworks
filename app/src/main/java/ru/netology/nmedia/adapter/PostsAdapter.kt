@@ -4,17 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
-import ru.netology.nmedia.activity.FeedFragment
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModelState
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -82,6 +78,8 @@ class PostViewHolder(
                 }
             }
             attachment.isVisible = post.attachment != null
+
+            menu.isVisible = post.ownedByMe
 
             attachment.setOnClickListener {onInteractionListener.onImage(post)}
 

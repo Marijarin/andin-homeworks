@@ -8,6 +8,7 @@
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@id/constraint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_spacing">
@@ -81,14 +82,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/header"
+            app:layout_constraintBottom_toTopOf="@id/attachment"
             tools:text="@sample/posts.json/data/content" />
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/footer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="content" />
+        <ImageView
+            android:id="@+id/attachment"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginBottom="@dimen/common_spacing"
+            android:contentDescription="@string/post_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/content"
+            tools:srcCompat="@sample/posts.json/data/attachment" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/like"
@@ -97,7 +103,7 @@
             android:checkable="true"
             android:contentDescription="@string/description_post_like"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/footer"
+            app:layout_constraintTop_toBottomOf="@id/attachment"
             app:icon="@drawable/ic_like_24dp"
             tools:checked="@sample/posts.json/data/likedByMe"
             tools:text="@sample/posts.json/data/likes"
@@ -111,9 +117,31 @@
             android:layout_marginStart="@dimen/common_spacing"
             android:contentDescription="@string/description_post_share"
             app:layout_constraintStart_toEndOf="@+id/like"
-            app:layout_constraintTop_toBottomOf="@id/footer"
+            app:layout_constraintTop_toBottomOf="@id/attachment"
             app:icon="@drawable/ic_share_24"
             style="@style/Widget.AppTheme.IconButton"
+            />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/statusDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/common_spacing"
+            android:contentDescription="@string/done"
+            app:layout_constraintStart_toEndOf="@+id/share"
+            app:layout_constraintTop_toBottomOf="@id/attachment"
+            app:icon="@drawable/ic_done_24"
+            style="@style/Widget.AppTheme.IconButton"
+            />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/statusSaved"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/common_spacing"
+            android:contentDescription="@string/saved"
+            app:layout_constraintStart_toEndOf="@+id/share"
+            app:layout_constraintTop_toBottomOf="@id/attachment"
+            app:icon="@drawable/ic_done_all_24"
+            style="@style/Widget.AppTheme.SavedStyle"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

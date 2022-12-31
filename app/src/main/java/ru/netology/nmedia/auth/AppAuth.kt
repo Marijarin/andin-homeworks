@@ -4,6 +4,12 @@ import android.content.Context
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import retrofit2.Response
+import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.NetworkError
+import ru.netology.nmedia.error.UnknownError
+import java.io.IOException
 
 class AppAuth private constructor(context: Context) {
 
@@ -14,11 +20,11 @@ class AppAuth private constructor(context: Context) {
 
         private var INSTANCE: AppAuth? = null
 
-        fun getInstance(): AppAuth = requireNotNull(INSTANCE){
+        fun getInstance(): AppAuth = requireNotNull(INSTANCE) {
             "init() must be called before getInstance()"
         }
 
-        fun init(context: Context){
+        fun init(context: Context) {
             INSTANCE = AppAuth(context)
         }
     }
@@ -52,10 +58,25 @@ class AppAuth private constructor(context: Context) {
     }
 
     @Synchronized
-    fun removeAuth(){
-        prefs.edit{
+    fun removeAuth() {
+        prefs.edit {
             clear()
         }
         _state.value = null
+    }
+
+    suspend fun updateUser(login: String, password: String) {
+        try {
+            val response = PostsApi.retrofitService.updateUser(login, password)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
+            setAuth(newAuth.id,newAuth.token)
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw  UnknownError
+        }
     }
 }

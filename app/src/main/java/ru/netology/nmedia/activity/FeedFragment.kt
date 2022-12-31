@@ -6,12 +6,14 @@ import android.view.*
 import androidx.core.view.MenuProvider
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.ImageFragment.Companion.textArg
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -22,10 +24,10 @@ import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
-class FeedFragment : Fragment() {
+class FeedFragment : Fragment(), DialogListener {
 
     private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
-
+    private val authViewModel: AuthViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -122,40 +124,68 @@ class FeedFragment : Fragment() {
             viewModel.refresh()
         }
 
-        val authViewModel: AuthViewModel by viewModels()
+
         var menuProvider: MenuProvider? = null
 
-        authViewModel.state.observe(viewLifecycleOwner){
+        authViewModel.state.observe(viewLifecycleOwner) {
             menuProvider?.let(requireActivity()::removeMenuProvider)
-        }
 
-        requireActivity().addMenuProvider(object: MenuProvider{
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_auth, menu)
 
-                menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
-                menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
-            }
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_auth, menu)
 
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
-                when (menuItem.itemId) {
-                    R.id.signout -> {
-                        AppAuth.getInstance().removeAuth()
-                        true
-                    }
-                    R.id.signin -> {
-                        true
-                    }
-                    R.id.signup -> {
-                        true
-                    }
-                    else -> false
+                    menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+                    menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
                 }
-        }.apply {
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                    when (menuItem.itemId) {
+                        R.id.signout -> {
+                            AppAuth.getInstance().removeAuth()
+                            true
+                        }
+                        R.id.signin -> {
+                            startSignInDialog()
+                            true
+                        }
+                        R.id.signup -> {
+                            startSignUpDialog()
+                            true
+                        }
+                        else -> false
+                    }
+            }.apply {
                 menuProvider = this
-        }, viewLifecycleOwner)
+            }, viewLifecycleOwner)
+        }
 
         return binding.root
     }
 
+    fun startSignInDialog() {
+        val newDialogFragment = SignInDialogFragment()
+        newDialogFragment.show(childFragmentManager, "sign in")
+
+
+    }
+
+    fun startSignUpDialog(){
+        val newDialogFragment = SignUpDialogFragment()
+        newDialogFragment.show(childFragmentManager, "sign up")
+    }
+
+    override fun onDialogSignInClick(dialog: DialogFragment) {
+        authViewModel.updateUser()
+    }
+
+    override fun onDialogSignUpClick(dialog: DialogFragment) {
+
+    }
+
+    override fun onDialogNegativeClick(dialog: DialogFragment) {
+        findNavController().navigateUp()
+    }
+
 }
+

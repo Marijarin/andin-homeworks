@@ -2,24 +2,32 @@ package ru.netology.nmedia.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.view.MenuProvider
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.ImageFragment.Companion.textArg
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
-class FeedFragment : Fragment() {
+class FeedFragment : Fragment(), DialogListener {
 
     private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
-
+    private val authViewModel: AuthViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -33,7 +41,9 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                if (!post.likedByMe) viewModel.likeById(post.id) else if (post.likedByMe) viewModel.unlikeById(
+                    post.id
+                )
             }
 
             override fun onRemove(post: Post) {
@@ -51,23 +61,131 @@ class FeedFragment : Fragment() {
                     Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
             }
+
+            override fun onImage(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_imageFragment, Bundle().apply {
+                        textArg = post.attachment?.url
+                    })
+            }
         })
+        binding.newerPosts.visibility = View.GONE
+
         binding.list.adapter = adapter
+
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
+
+        }
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state is FeedModelState.Loading
+            binding.contentView.isRefreshing = state is FeedModelState.Refreshing
+            if (state is FeedModelState.Error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) { viewModel.refresh() }
+                    .show()
+            }
+        }
+        viewModel.edited.observe(viewLifecycleOwner) { post ->
+            if (post.id == 0L) {
+                return@observe
+            }
+            findNavController()
+                .navigate(R.id.action_feedFragment_to_newPostFragment, Bundle().apply {
+                    textArg = post.content
+                })
+
         }
 
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            println("Newer count ** $it")
+            if (it > 0) {
+                binding.newerPosts.isVisible = true
+            } else binding.newerPosts.visibility = View.GONE
+        }
+
+        binding.newerPosts.setOnClickListener {
+            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {
+                        binding.list.smoothScrollToPosition(0)
+                    }
+                }
+            })
+            viewModel.update()
+            binding.newerPosts.isGone = true
         }
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
+        binding.contentView.setOnRefreshListener {
+            viewModel.refresh()
+        }
+
+
+        var menuProvider: MenuProvider? = null
+
+        authViewModel.state.observe(viewLifecycleOwner) {
+            menuProvider?.let(requireActivity()::removeMenuProvider)
+
+
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_auth, menu)
+
+                    menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+                    menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                    when (menuItem.itemId) {
+                        R.id.signout -> {
+                            AppAuth.getInstance().removeAuth()
+                            true
+                        }
+                        R.id.signin -> {
+                            startSignInDialog()
+                            true
+                        }
+                        R.id.signup -> {
+                            startSignUpDialog()
+                            true
+                        }
+                        else -> false
+                    }
+            }.apply {
+                menuProvider = this
+            }, viewLifecycleOwner)
+        }
 
         return binding.root
     }
+
+    fun startSignInDialog() {
+        val newDialogFragment = SignInDialogFragment()
+        newDialogFragment.show(childFragmentManager, "sign in")
+
+
+    }
+
+    fun startSignUpDialog(){
+        val newDialogFragment = SignUpDialogFragment()
+        newDialogFragment.show(childFragmentManager, "sign up")
+    }
+
+    override fun onDialogSignInClick(dialog: DialogFragment) {
+        authViewModel.updateUser()
+    }
+
+    override fun onDialogSignUpClick(dialog: DialogFragment) {
+
+    }
+
+    override fun onDialogNegativeClick(dialog: DialogFragment) {
+        findNavController().navigateUp()
+    }
+
 }
+

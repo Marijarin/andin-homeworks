@@ -3,9 +3,11 @@ package ru.netology.nmedia.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -15,13 +17,17 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onImage(post:Post){}
 }
 
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
 ) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+
+
         return PostViewHolder(binding, onInteractionListener)
     }
 
@@ -36,6 +42,11 @@ class PostViewHolder(
     private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    companion object {
+        private const val BASE_URL = "http://10.0.2.2:9999"
+
+    }
+
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
@@ -44,6 +55,33 @@ class PostViewHolder(
             // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+
+            statusDone.isVisible = !post.saved
+            statusSaved.isVisible = post.saved
+
+            Glide.with(avatar)
+                .load("${BASE_URL}/avatars/${post.authorAvatar}")
+                .circleCrop()
+                .placeholder(R.drawable.ic_loading_24)
+                .error(R.drawable.ic_error_24)
+                .timeout(10_000)
+                .into(avatar)
+
+            attachment.let {
+                if (post.attachment != null) {
+                    Glide.with(attachment)
+                        .load("${BASE_URL}/media/${post.attachment.url}")
+                        .placeholder(R.drawable.ic_loading_24)
+                        .error(R.drawable.ic_error_24)
+                        .timeout(10_000)
+                        .into(attachment)
+                }
+            }
+            attachment.isVisible = post.attachment != null
+
+            menu.isVisible = post.ownedByMe
+
+            attachment.setOnClickListener {onInteractionListener.onImage(post)}
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
@@ -66,7 +104,9 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                onInteractionListener.onLike(post)
+                if (post.saved) {
+                    onInteractionListener.onLike(post)
+                } else like.isChecked = false
             }
 
             share.setOnClickListener {

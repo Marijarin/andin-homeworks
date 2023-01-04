@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 
@@ -18,6 +19,7 @@ interface OnInteractionListener {
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
     fun onImage(post:Post){}
+    fun onAuth(){}
 }
 
 class PostsAdapter(
@@ -104,9 +106,14 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if (post.saved) {
+                if (post.saved && AppAuth.getInstance().state.value!=null) {
                     onInteractionListener.onLike(post)
-                } else like.isChecked = false
+                } else if (AppAuth.getInstance().state.value==null) {
+                    like.isChecked = false
+                    like.isEnabled = false
+                    onInteractionListener.onAuth()
+
+                }
             }
 
             share.setOnClickListener {

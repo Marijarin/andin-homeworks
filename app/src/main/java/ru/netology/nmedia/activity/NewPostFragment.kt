@@ -31,7 +31,9 @@ class NewPostFragment : Fragment() {
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
     private var fragmentBinding: FragmentNewPostBinding? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -64,7 +66,7 @@ class NewPostFragment : Fragment() {
                     .show()
             }
         }
-       val pickPhotoLauncher =
+        val pickPhotoLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 when (it.resultCode) {
                     ImagePicker.RESULT_ERROR -> {
@@ -109,7 +111,9 @@ class NewPostFragment : Fragment() {
             viewModel.changePhoto(null, null)
         }
 
-        viewModel.photo.observe(viewLifecycleOwner){
+
+
+        viewModel.photo.observe(viewLifecycleOwner) {
             binding.photo.setImageURI(it.uri)
             binding.photoContainer.isVisible = it.uri != null
         }
@@ -126,11 +130,13 @@ class NewPostFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.save -> {
+
                         viewModel.changeContent(binding.edit.text.toString())
                         viewModel.save()
                         AndroidUtils.hideKeyboard(requireView())
                         true
                     }
+
                     else -> false
                 }
             }

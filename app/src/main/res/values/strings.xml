@@ -35,5 +35,15 @@
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
     <string name="sign_out">Sign out</string>
+    <string name="cancel">Not now</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="signed_out">You have signed out</string>
+    <string name="want_to_sign_in">I want to sign in</string>
+    <string name="want_to_sign_out">Confirm signing out</string>
+    <string name="warn_out">Only authorized users can post and like.</string>
+
 
 </resources>

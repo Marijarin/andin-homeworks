@@ -1,12 +1,16 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
-import androidx.core.view.MenuProvider
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +19,6 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
@@ -25,14 +28,29 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
-
+    private val authViewModel: AuthViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-
+        val alertDialog: AlertDialog? = activity?.let {
+            val builder = AlertDialog.Builder(it)
+            builder.apply {
+                setPositiveButton(R.string.want_to_sign_in,
+                    DialogInterface.OnClickListener { dialog, id ->
+                        findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
+                    })
+                setNegativeButton(R.string.cancel,
+                    DialogInterface.OnClickListener { dialog, id ->
+                        viewModel.refresh()
+                    })
+            }
+                .setIcon(R.drawable.ic_netology_48dp)
+                .setMessage(R.string.warn_out)
+            builder.create()
+        }
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
@@ -65,6 +83,10 @@ class FeedFragment : Fragment() {
                     R.id.action_feedFragment_to_imageFragment, Bundle().apply {
                         textArg = post.attachment?.url
                     })
+            }
+
+            override fun onAuth() {
+                alertDialog?.show()
             }
         })
         binding.newerPosts.visibility = View.GONE
@@ -103,6 +125,8 @@ class FeedFragment : Fragment() {
             } else binding.newerPosts.visibility = View.GONE
         }
 
+
+
         binding.newerPosts.setOnClickListener {
             adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -116,44 +140,16 @@ class FeedFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            authViewModel.state.observe(viewLifecycleOwner) {
+                if (!authViewModel.authenticated) {
+                    alertDialog?.show()
+
+                } else if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            }
         }
         binding.contentView.setOnRefreshListener {
             viewModel.refresh()
         }
-
-        val authViewModel: AuthViewModel by viewModels()
-        var menuProvider: MenuProvider? = null
-
-        authViewModel.state.observe(viewLifecycleOwner){
-            menuProvider?.let(requireActivity()::removeMenuProvider)
-        }
-
-        requireActivity().addMenuProvider(object: MenuProvider{
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_auth, menu)
-
-                menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
-                menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
-                when (menuItem.itemId) {
-                    R.id.signout -> {
-                        AppAuth.getInstance().removeAuth()
-                        true
-                    }
-                    R.id.signin -> {
-                        true
-                    }
-                    R.id.signup -> {
-                        true
-                    }
-                    else -> false
-                }
-        }.apply {
-                menuProvider = this
-        }, viewLifecycleOwner)
 
         return binding.root
     }

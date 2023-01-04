@@ -36,4 +36,14 @@
     <string name="sign_in">Войти</string>
     <string name="sign_up">Зарегистрироваться</string>
     <string name="sign_out">Выйти</string>
+    <string name="cancel">Не сейчас</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="username">Имя пользователя</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="signed_out">Вы вышли из аккаунта</string>
+    <string name="want_to_sign_in">Хочу войти в аккаунт</string>
+    <string name="caution_out">Только авторизованные пользователи могут создавать посты</string>
+    <string name="warn_out">Только авторизованные пользователи могут лайкать и постить</string>
+    <string name="want_to_sign_out">Подтвердите выход из аккаунта</string>
 </resources>

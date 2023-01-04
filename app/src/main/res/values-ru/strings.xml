@@ -43,7 +43,6 @@
     <string name="confirm_password">Подтвердите пароль</string>
     <string name="signed_out">Вы вышли из аккаунта</string>
     <string name="want_to_sign_in">Хочу войти в аккаунт</string>
-    <string name="caution_out">Только авторизованные пользователи могут создавать посты</string>
     <string name="warn_out">Только авторизованные пользователи могут лайкать и постить</string>
     <string name="want_to_sign_out">Подтвердите выход из аккаунта</string>
 </resources>

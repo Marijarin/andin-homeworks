@@ -15,7 +15,7 @@ import ru.netology.nmedia.viewmodel.AuthViewModel
 class SignInFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by activityViewModels()
-    private var fragmentSignInBinding: FragmentSignInBinding? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,7 +23,7 @@ class SignInFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentSignInBinding.inflate(inflater, container, false)
-        fragmentSignInBinding = binding
+
 
 
         binding.`in`.setOnClickListener {

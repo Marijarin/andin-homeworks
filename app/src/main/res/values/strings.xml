@@ -44,6 +44,7 @@
     <string name="want_to_sign_in">I want to sign in</string>
     <string name="want_to_sign_out">Confirm signing out</string>
     <string name="warn_out">Only authorized users can post and like.</string>
+    <string name="not_confirmed">Passwords do not match!</string>
 
 
 </resources>

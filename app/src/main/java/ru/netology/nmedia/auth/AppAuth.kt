@@ -78,4 +78,19 @@ class AppAuth private constructor(context: Context) {
             throw  UnknownError
         }
     }
+
+    suspend fun registerUser(login: String, password: String, name: String){
+        try {
+            val response = PostsApi.retrofitService.registerUser(login, password, name)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
+            setAuth(newAuth.id,newAuth.token)
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw  UnknownError
+        }
+    }
 }

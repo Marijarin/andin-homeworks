@@ -22,4 +22,13 @@ class AuthViewModel: ViewModel() {
         }
     }
 
+    fun registerUser(login: String, password: String, name: String) = viewModelScope.launch {
+        try {
+            AppAuth.getInstance().registerUser(login, password, name)
+        } catch (e: Exception) {
+            println(e)
+            throw AppError.from(e)
+        }
+    }
+
 }

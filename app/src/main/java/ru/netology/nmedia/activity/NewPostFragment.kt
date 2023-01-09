@@ -32,8 +32,6 @@ class NewPostFragment : Fragment() {
         ownerProducer = ::requireParentFragment
     )
 
-    private var fragmentBinding: FragmentNewPostBinding? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +46,7 @@ class NewPostFragment : Fragment() {
         arguments?.textArg
             ?.let(binding.edit::setText)
 
-        fragmentBinding = binding
+
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             if (state is FeedModelState.Error) {
                 Snackbar

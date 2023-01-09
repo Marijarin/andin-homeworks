@@ -45,4 +45,5 @@
     <string name="want_to_sign_in">Хочу войти в аккаунт</string>
     <string name="warn_out">Только авторизованные пользователи могут лайкать и постить</string>
     <string name="want_to_sign_out">Подтвердите выход из аккаунта</string>
+    <string name="not_confirmed">Пароли не совпадают!</string>
 </resources>

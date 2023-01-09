@@ -24,11 +24,7 @@ class ImageFragment : Fragment() {
         private const val BASE_URL = "http://10.0.2.2:9999"
     }
 
-
     private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
-
-    private var imageFragmentBinding: FragmentImageBinding? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +36,6 @@ class ImageFragment : Fragment() {
             container,
             false
         )
-        imageFragmentBinding = binding
-
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             if (state is FeedModelState.Error) {
                 Snackbar

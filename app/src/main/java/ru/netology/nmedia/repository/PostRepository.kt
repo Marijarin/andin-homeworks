@@ -1,11 +1,20 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
+import retrofit2.Response
 import ru.netology.nmedia.dto.Post
+import java.io.File
 
 interface PostRepository {
-    fun getAll(): List<Post>
-    fun likeById(id: Long)
-    fun save(post: Post)
-    fun removeById(id: Long)
+    val data: Flow<List<Post>>
+    suspend fun getAll()
+    fun getNewerCount(newerPostId: Long): Flow<Int>
+    suspend fun likeById(id: Long)
+    suspend fun unlikeById(id: Long)
+    suspend fun save(post: Post)
+    suspend fun removeById(id: Long)
+    suspend fun checkNotSaved()
+    suspend fun update()
+    suspend fun saveWithAttachment(post: Post, file: File)
+
 }

@@ -4,11 +4,15 @@ import android.content.Context
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import java.io.File
 
 
 class AppAuth private constructor(context: Context) {
@@ -82,6 +86,31 @@ class AppAuth private constructor(context: Context) {
     suspend fun registerUser(login: String, password: String, name: String){
         try {
             val response = PostsApi.retrofitService.registerUser(login, password, name)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
+            setAuth(newAuth.id,newAuth.token)
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw  UnknownError
+        }
+    }
+
+    suspend fun registerWithPhoto(login: String, password: String, name: String, file: File){
+        try {
+            val fileData = MultipartBody.Part.createFormData(
+                "file",
+                file.name,
+                file.asRequestBody()
+            )
+            val response = PostsApi.retrofitService.registerWithPhoto(
+                login.toRequestBody(),
+                password.toRequestBody(),
+                name.toRequestBody(),
+                fileData )
+
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }

@@ -67,7 +67,6 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu_auth, menu)
-
                 menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
                 menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
             }

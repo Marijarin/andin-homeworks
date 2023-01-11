@@ -36,7 +36,7 @@
         android:id="@+id/imageFragment"
         android:name="ru.netology.nmedia.activity.ImageFragment"
         android:label="ImageFragment" />
-    <fragment
+    <dialog
         android:id="@+id/signInFragment"
         android:name="ru.netology.nmedia.activity.SignInFragment"
         android:label="SignInFragment" />

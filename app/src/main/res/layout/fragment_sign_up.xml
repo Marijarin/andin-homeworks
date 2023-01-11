@@ -3,33 +3,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".activity.NewPostFragment">
 
-    <FrameLayout
-        android:id="@+id/photoContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/authWindow"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/description_photo"
+            tools:srcCompat="@sample/posts.json/data/attachment"
+            />
 
         <LinearLayout
             android:id="@+id/authWindow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|center"
             android:background="#ffffff"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/avatar"
+            >
 
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
+                android:layout_height="@dimen/icon_button_min_size"
                 android:background="@color/colorDark"
                 android:contentDescription="@string/app_name"
                 android:scaleType="center"
                 android:src="@drawable/ic_netology_48dp" />
 
-
+            <Button
+                android:id="@+id/uploadAvatar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/icon_button_min_size"
+                android:background="@color/colorPrimary"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/avatar"
+                app:icon="@drawable/ic_photo_24"
+                />
 
                 <EditText
                     android:id="@+id/username"
@@ -92,6 +109,6 @@
                 android:text="@string/sign_up" />
         </LinearLayout>
 
-    </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

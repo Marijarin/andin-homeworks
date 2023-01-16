@@ -11,6 +11,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -140,12 +141,14 @@ class FeedFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
-            authViewModel.state.observe(viewLifecycleOwner) {
-                if (!authViewModel.authenticated) {
-                    alertDialog?.show()
-
-                } else if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            if (!authViewModel.authenticated) {
+                alertDialog?.show()
+            } else if (authViewModel.authenticated) {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
             }
+        }
+        setFragmentResultListener("signInClosed") { _, _ ->
+            if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
         binding.contentView.setOnRefreshListener {
             viewModel.refresh()

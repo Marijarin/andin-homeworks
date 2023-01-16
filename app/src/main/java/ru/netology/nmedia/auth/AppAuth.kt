@@ -2,13 +2,19 @@ package ru.netology.nmedia.auth
 
 import android.content.Context
 import androidx.core.content.edit
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
@@ -17,24 +23,27 @@ import java.io.File
 
 class AppAuth private constructor(context: Context) {
 
-
-    companion object {
-        const val TOKEN_KEY = "TOKEN_KEY"
-        const val ID_KEY = "ID_KEY"
-
-        private var INSTANCE: AppAuth? = null
-
-        fun getInstance(): AppAuth = requireNotNull(INSTANCE){
-            "init() must be called before getInstance()"
-        }
-
-        fun init(context: Context){
-            INSTANCE = AppAuth(context)
-        }
-    }
-
+    private val TOKEN_KEY = "TOKEN_KEY"
+    private val ID_KEY = "ID_KEY"
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val _state: MutableStateFlow<AuthState?>
+
+    companion object {
+        @Volatile
+        private var instance: AppAuth? = null
+
+        fun getInstance(): AppAuth = synchronized(this) {
+            instance ?: throw IllegalStateException(
+                "AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
+            )
+        }
+
+        fun initApp(context: Context): AppAuth = instance ?: synchronized(this) {
+            instance ?: buildAuth(context).also { instance = it }
+        }
+
+        private fun buildAuth(context: Context): AppAuth = AppAuth(context)
+    }
 
     init {
         val token = prefs.getString(TOKEN_KEY, null)
@@ -48,6 +57,7 @@ class AppAuth private constructor(context: Context) {
         } else {
             _state = MutableStateFlow(AuthState(id, token))
         }
+        sendPushToken()
     }
 
     val state = _state.asStateFlow()
@@ -59,23 +69,26 @@ class AppAuth private constructor(context: Context) {
             putString(TOKEN_KEY, token)
         }
         _state.value = AuthState(id, token)
+        sendPushToken()
     }
 
     @Synchronized
-    fun removeAuth(){
-        prefs.edit{
+    fun removeAuth() {
+        prefs.edit {
             clear()
         }
         _state.value = null
+        sendPushToken()
     }
+
     suspend fun updateUser(login: String, password: String) {
         try {
-            val response = PostsApi.retrofitService.updateUser(login, password)
+            val response = Api.retrofitService.updateUser(login, password)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
             val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
-            setAuth(newAuth.id,newAuth.token)
+            setAuth(newAuth.id, newAuth.token)
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -83,14 +96,14 @@ class AppAuth private constructor(context: Context) {
         }
     }
 
-    suspend fun registerUser(login: String, password: String, name: String){
+    suspend fun registerUser(login: String, password: String, name: String) {
         try {
-            val response = PostsApi.retrofitService.registerUser(login, password, name)
+            val response = Api.retrofitService.registerUser(login, password, name)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
             val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
-            setAuth(newAuth.id,newAuth.token)
+            setAuth(newAuth.id, newAuth.token)
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -98,28 +111,43 @@ class AppAuth private constructor(context: Context) {
         }
     }
 
-    suspend fun registerWithPhoto(login: String, password: String, name: String, file: File){
+    suspend fun registerWithPhoto(login: String, password: String, name: String, file: File) {
         try {
             val fileData = MultipartBody.Part.createFormData(
                 "file",
                 file.name,
                 file.asRequestBody()
             )
-            val response = PostsApi.retrofitService.registerWithPhoto(
+            val response = Api.retrofitService.registerWithPhoto(
                 login.toRequestBody(),
                 password.toRequestBody(),
                 name.toRequestBody(),
-                fileData )
+                fileData
+            )
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
             val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
-            setAuth(newAuth.id,newAuth.token)
+            setAuth(newAuth.id, newAuth.token)
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
             throw  UnknownError
+        }
+    }
+
+    fun sendPushToken(token: String? = null) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                Api.retrofitService.sendPushToken(
+                    PushToken(
+                        token ?: FirebaseMessaging.getInstance().token.await()
+                    )
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

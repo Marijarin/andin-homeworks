@@ -32,11 +32,11 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         val alertDialog: AlertDialog? = let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(R.string.sign_out,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        findNavController(R.id.nav_host_fragment).navigateUp()
-
-                    })
+                setPositiveButton(R.string.sign_out
+                ) { _, _ ->
+                    AppAuth.getInstance().removeAuth()
+                    findNavController(R.id.nav_host_fragment).navigateUp()
+                }
             }
                 .setIcon(R.drawable.ic_netology_48dp)
                 .setMessage(R.string.want_to_sign_out)
@@ -64,41 +64,35 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         checkGoogleApiAvailability()
 
-        addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_auth, menu)
-                menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
-                menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
-                when (menuItem.itemId) {
-                    R.id.signout -> {
-                        alertDialog?.show()
-                        Snackbar.make(
-                            findViewById(R.id.nav_host_fragment),
-                            R.string.signed_out,
-                            Snackbar.LENGTH_LONG
-                        )
-                            .show()
-                        AppAuth.getInstance().removeAuth()
-                        true
-                    }
-                    R.id.signin -> {
-                        findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_signInFragment)
-                        true
-                    }
-                    R.id.signup -> {
-                        findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_signUpFragment)
-
-                        true
-                    }
-                    else -> false
+        authViewModel.state.observe(this) {
+            menuProvider?.also(::removeMenuProvider) // Здесь тоже не забываем, иначе меню дублироваться будет
+            addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_auth, menu)
+                    menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+                    menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
                 }
-        }.apply {
-            menuProvider = this
-        })
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                    when (menuItem.itemId) {
+                        R.id.signout -> {
+                            alertDialog?.show()
+                            true
+                        }
+                        R.id.signin -> {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_signInFragment)
+                            true
+                        }
+                        R.id.signup -> {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_feedFragment_to_signUpFragment)
 
+                            true
+                        }
+                        else -> false
+                    }
+            }.apply {
+                menuProvider = this
+            })
+        }
     }
 
     private fun checkGoogleApiAvailability() {

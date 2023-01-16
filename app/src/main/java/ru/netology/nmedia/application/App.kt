@@ -7,6 +7,6 @@ import ru.netology.nmedia.auth.AppAuth
 class App: Application() {
     override fun onCreate() {
         super.onCreate()
-        AppAuth.init(this)
+        AppAuth.initApp(this)
     }
 }

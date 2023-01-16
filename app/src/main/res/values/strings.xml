@@ -46,6 +46,7 @@
     <string name="warn_out">Only authorized users can post and like.</string>
     <string name="not_confirmed">Passwords do not match!</string>
     <string name="avatar">Avatar upload</string>
+    <string name="fromServer">Hello from server %1$s</string>
 
 
 </resources>

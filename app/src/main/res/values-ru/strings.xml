@@ -47,4 +47,5 @@
     <string name="want_to_sign_out">Подтвердите выход из аккаунта</string>
     <string name="not_confirmed">Пароли не совпадают!</string>
     <string name="avatar">Загрузка аватара</string>
+    <string name="fromServer">Привет с сервера %1$s</string>
 </resources>

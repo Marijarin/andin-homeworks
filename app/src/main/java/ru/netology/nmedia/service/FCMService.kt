@@ -10,12 +10,14 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import kotlin.random.Random
 
 
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
+    private val recipientId = "recipientId"
     private val channelId = "remote"
     private val gson = Gson()
 
@@ -34,16 +36,37 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        val userId = AppAuth.getInstance().state.value?.id
+        val recipient = gson.fromJson(message.data[recipientId], Long::class.java)
 
-        message.data[action]?.let {
-           when (Action.valueOf(it)) {
-              Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-           }
+        when (recipient) {
+            null, userId -> handleMessage(gson.fromJson(message.data[content], String::class.java))
+            else -> AppAuth.getInstance().sendPushToken()
         }
+        /*message.data[action]?.let {
+            when (Action.valueOf(it)) {
+                Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
+            }
+        }*/
     }
 
     override fun onNewToken(token: String) {
-        println(token)
+        AppAuth.getInstance().sendPushToken(token)
+    }
+
+    private fun handleMessage(content: String) {
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(
+                getString(
+                    R.string.fromServer,
+                    content)
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        NotificationManagerCompat.from(this)
+            .notify(Random.nextInt(100_000), notification)
     }
 
     private fun handleLike(content: Like) {
@@ -73,5 +96,9 @@ data class Like(
     val userName: String,
     val postId: Long,
     val postAuthor: String,
+)
+data class MailOut(
+    val recipientId: Long?,
+    val message: String
 )
 

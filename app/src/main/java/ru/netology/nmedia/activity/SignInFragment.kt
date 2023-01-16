@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.databinding.FragmentSignInBinding
 import ru.netology.nmedia.util.AndroidUtils
@@ -25,8 +27,6 @@ class SignInFragment : DialogFragment() {
     ): View {
         val binding = FragmentSignInBinding.inflate(inflater, container, false)
 
-
-
         binding.`in`.setOnClickListener {
             AndroidUtils.hideKeyboard(requireView())
             if (binding.login.text.isNotBlank() && binding.password.text.isNotBlank()){
@@ -35,8 +35,9 @@ class SignInFragment : DialogFragment() {
         }
 
         authViewModel.state.observe(viewLifecycleOwner) {
-            if (authViewModel.authenticated){
+            if (authViewModel.authenticated) {
                 findNavController().navigateUp()
+                setFragmentResult("signInClosed", bundleOf())
             }
         }
 

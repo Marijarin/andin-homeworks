@@ -9,19 +9,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.databinding.FragmentSignInBinding
-import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
 
+@AndroidEntryPoint
 class SignInFragment : DialogFragment() {
-    private val dependencyContainer = DependencyContainer.getInstance()
-    private val authViewModel: AuthViewModel by activityViewModels(
-        factoryProducer = {
-            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-        }
-    )
+    private val authViewModel: AuthViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -33,9 +28,12 @@ class SignInFragment : DialogFragment() {
 
         binding.`in`.setOnClickListener {
             AndroidUtils.hideKeyboard(requireView())
-            if (binding.login.text.isNotBlank() && binding.password.text.isNotBlank()){
-                authViewModel.updateUser(binding.login.text.toString(),binding.password.text.toString() )
-                }
+            if (binding.login.text.isNotBlank() && binding.password.text.isNotBlank()) {
+                authViewModel.updateUser(
+                    binding.login.text.toString(),
+                    binding.password.text.toString()
+                )
+            }
         }
 
         authViewModel.state.observe(viewLifecycleOwner) {

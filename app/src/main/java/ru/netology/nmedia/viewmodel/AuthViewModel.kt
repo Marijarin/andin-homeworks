@@ -2,13 +2,15 @@ package ru.netology.nmedia.viewmodel
 
 import android.net.Uri
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.model.PhotoModel
 import java.io.File
-
-class AuthViewModel(
+import javax.inject.Inject
+@HiltViewModel
+class AuthViewModel @Inject constructor(
      private val appAuth: AppAuth
 ) : ViewModel() {
     val state = appAuth.state

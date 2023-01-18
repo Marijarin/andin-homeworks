@@ -15,20 +15,15 @@ import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignUpBinding
-import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
 
+@AndroidEntryPoint
 class SignUpFragment : Fragment() {
-    private val dependencyContainer = DependencyContainer.getInstance()
-    private val authViewModel: AuthViewModel by activityViewModels(
-        factoryProducer = {
-            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-        }
-    )
+    private val authViewModel: AuthViewModel by activityViewModels()
 
 
     override fun onCreateView(
@@ -70,7 +65,7 @@ class SignUpFragment : Fragment() {
                 .createIntent(pickPhotoLauncher::launch)
         }
 
-        authViewModel.photo.observe(viewLifecycleOwner){
+        authViewModel.photo.observe(viewLifecycleOwner) {
             binding.avatar.setImageURI(it.uri)
             binding.avatar.isVisible = it.uri != null
         }
@@ -81,8 +76,9 @@ class SignUpFragment : Fragment() {
                 binding.username.text.isNotBlank()
                 && binding.login.text.isNotBlank()
                 && binding.password.text.isNotBlank()
-                && binding.password.text.toString() == binding.confirm.text.toString()) {
-                when(authViewModel.photo.value) {
+                && binding.password.text.toString() == binding.confirm.text.toString()
+            ) {
+                when (authViewModel.photo.value) {
                     null -> authViewModel.registerUser(
                         binding.login.text.toString(),
                         binding.password.text.toString(),

@@ -14,21 +14,21 @@ import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.repository.di.DependencyContainer
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
-    private val authViewModel: AuthViewModel by viewModels(
-        factoryProducer = {
-            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-        }
-    )
-    private val dependencyContainer = DependencyContainer.getInstance()
+    private val authViewModel: AuthViewModel by viewModels()
+
     private var menuProvider: MenuProvider? = null
 
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +36,10 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         val alertDialog: AlertDialog? = let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(R.string.sign_out
+                setPositiveButton(
+                    R.string.sign_out
                 ) { _, _ ->
-                    dependencyContainer.appAuth.removeAuth()
+                    appAuth.removeAuth()
                     findNavController(R.id.nav_host_fragment).navigateUp()
                 }
             }
@@ -76,6 +77,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                     menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
                     menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
                 }
+
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
                     when (menuItem.itemId) {
                         R.id.signout -> {

@@ -8,10 +8,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.CardPostBinding
-import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.dto.Post
+import javax.inject.Inject
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -47,7 +49,8 @@ class PostViewHolder(
     companion object {
         private const val BASE_URL = "http://10.0.2.2:9999"
     }
-
+    @Inject
+    lateinit var appAuth: AppAuth
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
@@ -105,9 +108,9 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if (post.saved && DependencyContainer.getInstance().appAuth.state.value!=null) {
+                if (post.saved && appAuth.state.value!=null) {
                     onInteractionListener.onLike(post)
-                } else if (DependencyContainer.getInstance().appAuth.state.value==null) {
+                } else if (appAuth.state.value==null) {
                     like.isChecked = false
                     like.isEnabled = false
                     onInteractionListener.onAuth()

@@ -3,6 +3,11 @@ package ru.netology.nmedia.auth
 import android.content.Context
 import androidx.core.content.edit
 import com.google.firebase.messaging.FirebaseMessaging
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +18,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
-import ru.netology.nmedia.repository.di.DependencyContainer
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
@@ -23,7 +28,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AppAuth @Inject constructor(context: Context) {
+class AppAuth @Inject constructor(
+    @ApplicationContext
+    private val context: Context) {
 
     private val TOKEN_KEY = "TOKEN_KEY"
     private val ID_KEY = "ID_KEY"
@@ -65,10 +72,16 @@ class AppAuth @Inject constructor(context: Context) {
         _state.value = null
         sendPushToken()
     }
+    @InstallIn(SingletonComponent::class)
+    @EntryPoint
+    interface AppAuthEntryPoint{
+        fun getApiService(): ApiService
+    }
 
     suspend fun updateUser(login: String, password: String) {
         try {
-            val response = DependencyContainer.getInstance().apiService.updateUser(login, password)
+            val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
+            val response = entryPoint.getApiService().updateUser(login, password)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -83,8 +96,9 @@ class AppAuth @Inject constructor(context: Context) {
 
     suspend fun registerUser(login: String, password: String, name: String) {
         try {
+            val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
             val response =
-                DependencyContainer.getInstance().apiService.registerUser(login, password, name)
+                entryPoint.getApiService().registerUser(login, password, name)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -104,7 +118,8 @@ class AppAuth @Inject constructor(context: Context) {
                 file.name,
                 file.asRequestBody()
             )
-            val response = DependencyContainer.getInstance().apiService.registerWithPhoto(
+            val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
+            val response = entryPoint.getApiService().registerWithPhoto(
                 login.toRequestBody(),
                 password.toRequestBody(),
                 name.toRequestBody(),
@@ -126,7 +141,8 @@ class AppAuth @Inject constructor(context: Context) {
     fun sendPushToken(token: String? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                DependencyContainer.getInstance().apiService.sendPushToken(
+                val entryPoint = EntryPointAccessors.fromApplication(context, AppAuthEntryPoint::class.java)
+                entryPoint.getApiService().sendPushToken(
                     PushToken(
                         token ?: FirebaseMessaging.getInstance().token.await()
                     )

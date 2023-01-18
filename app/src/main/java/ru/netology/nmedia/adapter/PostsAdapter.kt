@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.dto.Post
 
 interface OnInteractionListener {
@@ -105,9 +105,9 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if (post.saved && AppAuth.getInstance().state.value!=null) {
+                if (post.saved && DependencyContainer.getInstance().appAuth.state.value!=null) {
                     onInteractionListener.onLike(post)
-                } else if (AppAuth.getInstance().state.value==null) {
+                } else if (DependencyContainer.getInstance().appAuth.state.value==null) {
                     like.isChecked = false
                     like.isEnabled = false
                     onInteractionListener.onAuth()

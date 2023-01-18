@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     compileSdkVersion 33
@@ -100,6 +101,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$viewmodel_lifecycle_version")
     implementation "androidx.coordinatorlayout:coordinatorlayout:$coordinatorlayout_version"
     implementation "com.github.dhaval2404:imagepicker:$imagepicker_version"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"

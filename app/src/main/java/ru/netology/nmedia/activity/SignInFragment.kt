@@ -6,18 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.databinding.FragmentSignInBinding
+import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.util.AndroidUtils
-import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class SignInFragment : DialogFragment() {
-
-    private val authViewModel: AuthViewModel by activityViewModels()
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val authViewModel: AuthViewModel by activityViewModels(
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        }
+    )
 
 
     override fun onCreateView(

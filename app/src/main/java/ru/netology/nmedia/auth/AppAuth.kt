@@ -13,37 +13,22 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-class AppAuth private constructor(context: Context) {
+@Singleton
+class AppAuth @Inject constructor(context: Context) {
 
     private val TOKEN_KEY = "TOKEN_KEY"
     private val ID_KEY = "ID_KEY"
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val _state: MutableStateFlow<AuthState?>
-
-    companion object {
-        @Volatile
-        private var instance: AppAuth? = null
-
-        fun getInstance(): AppAuth = synchronized(this) {
-            instance ?: throw IllegalStateException(
-                "AppAuth is not initialized, you must call AppAuth.initializeApp(Context context) first."
-            )
-        }
-
-        fun initApp(context: Context): AppAuth = instance ?: synchronized(this) {
-            instance ?: buildAuth(context).also { instance = it }
-        }
-
-        private fun buildAuth(context: Context): AppAuth = AppAuth(context)
-    }
 
     init {
         val token = prefs.getString(TOKEN_KEY, null)
@@ -83,7 +68,7 @@ class AppAuth private constructor(context: Context) {
 
     suspend fun updateUser(login: String, password: String) {
         try {
-            val response = Api.retrofitService.updateUser(login, password)
+            val response = DependencyContainer.getInstance().apiService.updateUser(login, password)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -98,7 +83,8 @@ class AppAuth private constructor(context: Context) {
 
     suspend fun registerUser(login: String, password: String, name: String) {
         try {
-            val response = Api.retrofitService.registerUser(login, password, name)
+            val response =
+                DependencyContainer.getInstance().apiService.registerUser(login, password, name)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -118,7 +104,7 @@ class AppAuth private constructor(context: Context) {
                 file.name,
                 file.asRequestBody()
             )
-            val response = Api.retrofitService.registerWithPhoto(
+            val response = DependencyContainer.getInstance().apiService.registerWithPhoto(
                 login.toRequestBody(),
                 password.toRequestBody(),
                 name.toRequestBody(),
@@ -140,7 +126,7 @@ class AppAuth private constructor(context: Context) {
     fun sendPushToken(token: String? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                Api.retrofitService.sendPushToken(
+                DependencyContainer.getInstance().apiService.sendPushToken(
                     PushToken(
                         token ?: FirebaseMessaging.getInstance().token.await()
                     )

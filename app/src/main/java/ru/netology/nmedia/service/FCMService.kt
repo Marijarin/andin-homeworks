@@ -10,7 +10,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
-import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.repository.di.DependencyContainer
 import kotlin.random.Random
 
 
@@ -36,22 +36,17 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        val userId = AppAuth.getInstance().state.value?.id
-        val recipient = gson.fromJson(message.data[recipientId], Long::class.java)
+        val userId = DependencyContainer.getInstance().appAuth.state.value?.id
+        val recipient = gson.fromJson(message.data[recipientId], MailOut::class.java).recipientId
 
         when (recipient) {
-            null, userId -> handleMessage(gson.fromJson(message.data[content], String::class.java))
-            else -> AppAuth.getInstance().sendPushToken()
+            null, userId -> handleMessage(gson.fromJson(message.data[content], MailOut::class.java).message)
+            else -> DependencyContainer.getInstance().appAuth.sendPushToken()
         }
-        /*message.data[action]?.let {
-            when (Action.valueOf(it)) {
-                Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-            }
-        }*/
     }
 
     override fun onNewToken(token: String) {
-        AppAuth.getInstance().sendPushToken(token)
+        DependencyContainer.getInstance().appAuth.sendPushToken(token)
     }
 
     private fun handleMessage(content: String) {

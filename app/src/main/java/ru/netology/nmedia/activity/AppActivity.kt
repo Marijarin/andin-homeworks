@@ -1,7 +1,6 @@
 package ru.netology.nmedia.activity
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -14,15 +13,20 @@ import androidx.core.view.MenuProvider
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
-    private val authViewModel: AuthViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels(
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        }
+    )
+    private val dependencyContainer = DependencyContainer.getInstance()
     private var menuProvider: MenuProvider? = null
 
 
@@ -34,7 +38,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             builder.apply {
                 setPositiveButton(R.string.sign_out
                 ) { _, _ ->
-                    AppAuth.getInstance().removeAuth()
+                    dependencyContainer.appAuth.removeAuth()
                     findNavController(R.id.nav_host_fragment).navigateUp()
                 }
             }

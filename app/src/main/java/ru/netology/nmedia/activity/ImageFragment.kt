@@ -12,9 +12,11 @@ import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentImageBinding
+import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class ImageFragment : Fragment() {
 
@@ -23,8 +25,12 @@ class ImageFragment : Fragment() {
 
         private const val BASE_URL = "http://10.0.2.2:9999"
     }
-
-    private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val viewModel: PostViewModel by viewModels(
+        ownerProducer = ::requireParentFragment,
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        })
 
     override fun onCreateView(
         inflater: LayoutInflater,

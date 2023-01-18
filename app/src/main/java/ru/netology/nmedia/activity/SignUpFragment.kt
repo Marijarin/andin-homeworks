@@ -17,12 +17,18 @@ import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignUpBinding
+import ru.netology.nmedia.repository.di.DependencyContainer
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class SignUpFragment : Fragment() {
-
-    private val authViewModel: AuthViewModel by activityViewModels()
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val authViewModel: AuthViewModel by activityViewModels(
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        }
+    )
 
 
     override fun onCreateView(

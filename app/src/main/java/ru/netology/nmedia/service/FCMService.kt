@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -41,10 +42,10 @@ class FCMService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         val userId = appAuth.state.value?.id
-        val recipient = gson.fromJson(message.data[recipientId], MailOut::class.java).recipientId
+        val recipient = gson.fromJson(message.data[content], MailOut::class.java).recipientId
 
         when (recipient) {
-            null, userId -> handleMessage(gson.fromJson(message.data[content], MailOut::class.java).message)
+            null, userId -> handleMessage(gson.fromJson(message.data[content], MailOut::class.java).content)
             else -> appAuth.sendPushToken()
         }
     }
@@ -53,19 +54,22 @@ class FCMService : FirebaseMessagingService() {
         appAuth.sendPushToken(token)
     }
 
-    private fun handleMessage(content: String) {
+    private fun handleMessage(message: String) {
+
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(
                 getString(
                     R.string.fromServer,
-                    content)
+                    message)
             )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
         NotificationManagerCompat.from(this)
             .notify(Random.nextInt(100_000), notification)
+
+        Log.d("from server", message)
     }
 
     private fun handleLike(content: Like) {
@@ -98,6 +102,6 @@ data class Like(
 )
 data class MailOut(
     val recipientId: Long?,
-    val message: String
+    val content: String
 )
 

@@ -148,9 +148,9 @@ class FeedFragment : Fragment() {
             } else if (authViewModel.authenticated) {
                 findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
             }
-        }
-        setFragmentResultListener("signInClosed") { _, _ ->
-            if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            setFragmentResultListener("signInClosed") { _, _ ->
+                if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            }
         }
         binding.contentView.setOnRefreshListener {
             viewModel.refresh()

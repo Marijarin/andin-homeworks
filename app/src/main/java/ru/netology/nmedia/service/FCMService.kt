@@ -20,7 +20,6 @@ import kotlin.random.Random
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
-    private val recipientId = "recipientId"
     private val channelId = "remote"
     private val gson = Gson()
 

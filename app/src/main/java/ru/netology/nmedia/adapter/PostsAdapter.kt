@@ -20,19 +20,20 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
-    fun onImage(post:Post){}
-    fun onAuth(){}
+    fun onImage(post: Post) {}
+    fun onAuth() {}
 }
 
-class PostsAdapter(
+class PostsAdapter @Inject constructor(
     private val onInteractionListener: OnInteractionListener,
+    private val appAuth: AppAuth
 ) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
 
-        return PostViewHolder(binding, onInteractionListener)
+        return PostViewHolder(binding, onInteractionListener, appAuth)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -44,13 +45,13 @@ class PostsAdapter(
 class PostViewHolder(
     private val binding: CardPostBinding,
     private val onInteractionListener: OnInteractionListener,
+    private val appAuth: AppAuth
 ) : RecyclerView.ViewHolder(binding.root) {
 
     companion object {
         private const val BASE_URL = "http://10.0.2.2:9999"
     }
-    @Inject
-    lateinit var appAuth: AppAuth
+
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
@@ -85,7 +86,7 @@ class PostViewHolder(
 
             menu.isVisible = post.ownedByMe
 
-            attachment.setOnClickListener {onInteractionListener.onImage(post)}
+            attachment.setOnClickListener { onInteractionListener.onImage(post) }
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
@@ -108,9 +109,9 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if (post.saved && appAuth.state.value!=null) {
+                if (post.saved && appAuth.state.value != null) {
                     onInteractionListener.onLike(post)
-                } else if (appAuth.state.value==null) {
+                } else if (appAuth.state.value == null) {
                     like.isChecked = false
                     like.isEnabled = false
                     onInteractionListener.onAuth()

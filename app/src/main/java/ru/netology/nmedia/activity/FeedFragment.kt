@@ -21,15 +21,18 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class FeedFragment : Fragment() {
-
+    @Inject
+    lateinit var appAuth: AppAuth
     private val viewModel: PostViewModel by viewModels()
     private val authViewModel: AuthViewModel by activityViewModels()
     override fun onCreateView(
@@ -37,6 +40,7 @@ class FeedFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
@@ -91,7 +95,7 @@ class FeedFragment : Fragment() {
             override fun onAuth() {
                 alertDialog?.show()
             }
-        })
+        }, appAuth)
         binding.newerPosts.visibility = View.GONE
 
         binding.list.adapter = adapter
@@ -145,13 +149,12 @@ class FeedFragment : Fragment() {
         binding.fab.setOnClickListener {
             if (!authViewModel.authenticated) {
                 alertDialog?.show()
-            } else if (authViewModel.authenticated) {
-                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
             }
             setFragmentResultListener("signInClosed") { _, _ ->
                 if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
             }
         }
+
         binding.contentView.setOnRefreshListener {
             viewModel.refresh()
         }

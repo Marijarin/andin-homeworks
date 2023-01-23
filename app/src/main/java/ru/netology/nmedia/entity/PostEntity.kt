@@ -19,7 +19,6 @@ data class PostEntity(
     val likes: Int = 0,
     @Embedded
     var attachment: AttachmentEmbeddable?,
-    val saved: Boolean,
     val show: Boolean = true,
     val authorId: Long = 0,
 ) {
@@ -32,7 +31,6 @@ data class PostEntity(
         likedByMe,
         likes,
         attachment?.toDto(),
-        saved,
         authorId = authorId
     )
 
@@ -47,7 +45,6 @@ data class PostEntity(
                 dto.likedByMe,
                 dto.likes,
                 AttachmentEmbeddable.fromDto(dto.attachment),
-                dto.saved,
                 authorId = dto.authorId
             )
     }

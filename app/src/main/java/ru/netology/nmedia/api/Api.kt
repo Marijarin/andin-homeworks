@@ -10,28 +10,8 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.PushToken
 
 interface ApiService {
-
-    @GET("posts")
-    suspend fun getAll(): Response<List<Post>>
-
-    @GET("posts/{id}/newer")
-    suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
-
-    @POST("posts/{id}/likes")
-    suspend fun likeById(@Path("id") id: Long): Response<Post>
-
-    @DELETE("posts/{id}/likes")
-    suspend fun unlikeById(@Path("id") id: Long): Response<Post>
-
-    @POST("posts")
-    suspend fun save(@Body post: Post): Response<Post>
-
-    @DELETE("posts/{id}")
-    suspend fun removeById(@Path("id") id: Long): Response<Unit>
-
-    @Multipart
-    @POST("media")
-    suspend fun upload(@Part file: MultipartBody.Part): Response<Media>
+    @POST("users/push-tokens")
+    suspend fun sendPushToken(@Body token: PushToken): Response<Unit>
 
     @FormUrlEncoded
     @POST("users/authentication")
@@ -57,8 +37,36 @@ interface ApiService {
         @Part media: MultipartBody.Part,
     ): Response<AuthState>
 
-    @POST("users/push-tokens")
-    suspend fun sendPushToken(@Body token: PushToken): Response<Unit>
+    @GET("posts")
+    suspend fun getAll(): Response<List<Post>>
+
+    @GET("posts/{id}/newer")
+    suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
+
+    @GET("posts/{id}/before")
+    suspend fun getBefore(@Path("id") id: Long, @Query("count") count: Int): Response<List<Post>>
+
+    @GET("posts/{id}/after")
+    suspend fun getAfter(@Path("id") id: Long, @Query("count") count: Int): Response<List<Post>>
+
+    @GET("posts/latest")
+    suspend fun getLatest(@Query("count") count: Int): Response<List<Post>>
+
+    @POST("posts/{id}/likes")
+    suspend fun likeById(@Path("id") id: Long): Response<Post>
+
+    @DELETE("posts/{id}/likes")
+    suspend fun unlikeById(@Path("id") id: Long): Response<Post>
+
+    @POST("posts")
+    suspend fun save(@Body post: Post): Response<Post>
+
+    @DELETE("posts/{id}")
+    suspend fun removeById(@Path("id") id: Long): Response<Unit>
+
+    @Multipart
+    @POST("media")
+    suspend fun upload(@Part file: MultipartBody.Part): Response<Media>
 }
 
 

@@ -25,7 +25,6 @@ import ru.netology.nmedia.viewmodel.AuthViewModel
 class SignUpFragment : Fragment() {
     private val authViewModel: AuthViewModel by activityViewModels()
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -101,7 +100,7 @@ class SignUpFragment : Fragment() {
             }
         }
 
-        authViewModel.state.observe(viewLifecycleOwner) {
+        authViewModel.data.observe(viewLifecycleOwner) {
             if (authViewModel.authenticated) {
                 findNavController().navigateUp()
             }

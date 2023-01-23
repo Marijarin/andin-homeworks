@@ -73,7 +73,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         checkGoogleApiAvailability()
 
-        authViewModel.state.observe(this) {
+        authViewModel.data.observe(this) {
             menuProvider?.also(::removeMenuProvider) // Здесь тоже не забываем, иначе меню дублироваться будет
             addMenuProvider(object : MenuProvider {
                 override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

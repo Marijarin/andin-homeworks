@@ -35,17 +35,17 @@ class AppAuth @Inject constructor(
     private val TOKEN_KEY = "TOKEN_KEY"
     private val ID_KEY = "ID_KEY"
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-    private val _state: MutableStateFlow<AuthState?>
-
+    private val _state: MutableStateFlow<AuthState>
     init {
+        val id = prefs.getLong(ID_KEY, 0)
         val token = prefs.getString(TOKEN_KEY, null)
-        val id = prefs.getLong(ID_KEY, 0L)
 
-        if (token == null || !prefs.contains(ID_KEY)) {
-            prefs.edit {
+        if (id == 0L || token == null) {
+            _state = MutableStateFlow(AuthState())
+            with(prefs.edit()) {
                 clear()
+                apply()
             }
-            _state = MutableStateFlow(null)
         } else {
             _state = MutableStateFlow(AuthState(id, token))
         }
@@ -69,7 +69,7 @@ class AppAuth @Inject constructor(
         prefs.edit {
             clear()
         }
-        _state.value = null
+        _state.value = AuthState()
         sendPushToken()
     }
     @InstallIn(SingletonComponent::class)
@@ -86,7 +86,7 @@ class AppAuth @Inject constructor(
                 throw ApiError(response.code(), response.message())
             }
             val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
-            setAuth(newAuth.id, newAuth.token)
+            newAuth.token?.let { setAuth(newAuth.id, it) }
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -103,7 +103,7 @@ class AppAuth @Inject constructor(
                 throw ApiError(response.code(), response.message())
             }
             val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
-            setAuth(newAuth.id, newAuth.token)
+            newAuth.token?.let { setAuth(newAuth.id, it) }
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -130,7 +130,7 @@ class AppAuth @Inject constructor(
                 throw ApiError(response.code(), response.message())
             }
             val newAuth = response.body() ?: throw ApiError(response.code(), response.message())
-            setAuth(newAuth.id, newAuth.token)
+            newAuth.token?.let { setAuth(newAuth.id, it) }
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {

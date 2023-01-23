@@ -4,16 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-import javax.inject.Inject
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -24,10 +22,10 @@ interface OnInteractionListener {
     fun onAuth() {}
 }
 
-class PostsAdapter @Inject constructor(
+class PostsAdapter (
     private val onInteractionListener: OnInteractionListener,
     private val appAuth: AppAuth
-) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+) : PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -37,7 +35,7 @@ class PostsAdapter @Inject constructor(
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
+        val post = getItem(position) ?: return
         holder.bind(post)
     }
 }
@@ -60,9 +58,6 @@ class PostViewHolder(
             // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
-
-            statusDone.isVisible = !post.saved
-            statusSaved.isVisible = post.saved
 
             Glide.with(avatar)
                 .load("${BASE_URL}/avatars/${post.authorAvatar}")
@@ -109,9 +104,9 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if (post.saved && appAuth.state.value != null) {
+                if ( appAuth.state.value.id != 0L) {
                     onInteractionListener.onLike(post)
-                } else if (appAuth.state.value == null) {
+                } else if (appAuth.state.value.id == 0L) {
                     like.isChecked = false
                     like.isEnabled = false
                     onInteractionListener.onAuth()

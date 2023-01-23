@@ -1,7 +1,6 @@
 package ru.netology.nmedia.activity
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,10 +12,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -45,14 +47,12 @@ class FeedFragment : Fragment() {
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(R.string.want_to_sign_in,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
-                    })
-                setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        viewModel.refresh()
-                    })
+                setPositiveButton(R.string.want_to_sign_in) { _, _ ->
+                    findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
+                }
+                setNegativeButton(R.string.cancel) { _, _ ->
+                    viewModel.refresh()
+                }
             }
                 .setIcon(R.drawable.ic_netology_48dp)
                 .setMessage(R.string.warn_out)
@@ -96,15 +96,13 @@ class FeedFragment : Fragment() {
                 alertDialog?.show()
             }
         }, appAuth)
-        binding.newerPosts.visibility = View.GONE
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
-            binding.emptyText.isVisible = state.empty
-
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest(adapter::submitData)
         }
+
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state is FeedModelState.Loading
             binding.contentView.isRefreshing = state is FeedModelState.Refreshing
@@ -125,26 +123,6 @@ class FeedFragment : Fragment() {
 
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) {
-            println("Newer count ** $it")
-            if (it > 0) {
-                binding.newerPosts.isVisible = true
-            } else binding.newerPosts.visibility = View.GONE
-        }
-
-
-
-        binding.newerPosts.setOnClickListener {
-            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    if (positionStart == 0) {
-                        binding.list.smoothScrollToPosition(0)
-                    }
-                }
-            })
-            viewModel.update()
-            binding.newerPosts.isGone = true
-        }
 
         binding.fab.setOnClickListener {
             if (!authViewModel.authenticated) {
@@ -154,9 +132,15 @@ class FeedFragment : Fragment() {
                 if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
             }
         }
-
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest{
+                it.refresh is LoadState.Loading
+                        || it.append is LoadState.Loading
+                        ||it.prepend is LoadState.Loading
+            }
+        }
         binding.contentView.setOnRefreshListener {
-            viewModel.refresh()
+           adapter.refresh()
         }
 
         return binding.root

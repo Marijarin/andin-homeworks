@@ -36,7 +36,7 @@ class SignInFragment : DialogFragment() {
             }
         }
 
-        authViewModel.state.observe(viewLifecycleOwner) {
+        authViewModel.data.observe(viewLifecycleOwner) {
             if (authViewModel.authenticated) {
                 findNavController().navigateUp()
                 setFragmentResult("signInClosed", bundleOf())

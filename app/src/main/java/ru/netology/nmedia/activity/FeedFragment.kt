@@ -44,6 +44,7 @@ class FeedFragment : Fragment() {
     ): View {
 
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
+        
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
@@ -58,6 +59,7 @@ class FeedFragment : Fragment() {
                 .setMessage(R.string.warn_out)
             builder.create()
         }
+
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
@@ -103,6 +105,12 @@ class FeedFragment : Fragment() {
             viewModel.data.collectLatest(adapter::submitData)
         }
 
+        authViewModel.data.observe(viewLifecycleOwner) {
+            if (authViewModel.authenticated) {
+                adapter.refresh()
+            }
+        }
+
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state is FeedModelState.Loading
             binding.contentView.isRefreshing = state is FeedModelState.Refreshing
@@ -112,6 +120,7 @@ class FeedFragment : Fragment() {
                     .show()
             }
         }
+
         viewModel.edited.observe(viewLifecycleOwner) { post ->
             if (post.id == 0L) {
                 return@observe
@@ -123,7 +132,6 @@ class FeedFragment : Fragment() {
 
         }
 
-
         binding.fab.setOnClickListener {
             if (!authViewModel.authenticated) {
                 alertDialog?.show()
@@ -132,18 +140,19 @@ class FeedFragment : Fragment() {
                 if (authViewModel.authenticated) findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
             }
         }
+
         lifecycleScope.launchWhenCreated {
-            adapter.loadStateFlow.collectLatest{
+            adapter.loadStateFlow.collectLatest {
                 it.refresh is LoadState.Loading
                         || it.append is LoadState.Loading
-                        ||it.prepend is LoadState.Loading
+                        || it.prepend is LoadState.Loading
             }
         }
+
         binding.contentView.setOnRefreshListener {
-           adapter.refresh()
+            adapter.refresh()
         }
 
         return binding.root
     }
-
 }

@@ -44,7 +44,7 @@ class FeedFragment : Fragment() {
     ): View {
 
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-        
+
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {

@@ -2,13 +2,23 @@ package ru.netology.nmedia.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Path
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
     @Query("SELECT * FROM PostEntity WHERE show = 1 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity WHERE id = :id & show = 1 ORDER BY id DESC LIMIT :count")
+    fun getBefore(id: Long, count: Int): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity WHERE show = 1 ORDER BY id DESC LIMIT :count")
+    fun getLatest(count: Int):Flow<List<PostEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)

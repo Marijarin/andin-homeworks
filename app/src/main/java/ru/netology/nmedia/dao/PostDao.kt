@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dao
 
+import androidx.paging.PagingSource
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
@@ -11,14 +12,17 @@ import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
-    @Query("SELECT * FROM PostEntity WHERE show = 1 ORDER BY id DESC")
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
-    @Query("SELECT * FROM PostEntity WHERE id = :id & show = 1 ORDER BY id DESC LIMIT :count")
-    fun getBefore(id: Long, count: Int): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE id = :id ORDER BY id DESC LIMIT :count")
+    suspend fun getBefore(id: Long, count: Int): List<PostEntity>
 
-    @Query("SELECT * FROM PostEntity WHERE show = 1 ORDER BY id DESC LIMIT :count")
-    fun getLatest(count: Int):Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC LIMIT :count")
+    suspend fun getLatest(count: Int): List<PostEntity>
+
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+    fun pagingSource(): PagingSource<Int, PostEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
@@ -28,9 +32,6 @@ interface PostDao {
 
     @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
     suspend fun updateContentById(id: Long, content: String)
-
-    @Query("UPDATE PostEntity SET show = 1 ")
-    suspend fun update()
 
     suspend fun save(post: PostEntity) =
         if (post.id == 0L) insert(post) else updateContentById(post.id, post.content)

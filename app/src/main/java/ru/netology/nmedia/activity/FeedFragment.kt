@@ -116,7 +116,7 @@ class FeedFragment : Fragment() {
             binding.contentView.isRefreshing = state is FeedModelState.Refreshing
             if (state is FeedModelState.Error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) { viewModel.refresh() }
+                    .setAction(R.string.retry_loading) {adapter.refresh() }
                     .show()
             }
         }

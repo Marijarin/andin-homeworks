@@ -19,7 +19,6 @@ data class PostEntity(
     val likes: Int = 0,
     @Embedded
     var attachment: AttachmentEmbeddable?,
-    val show: Boolean = true,
     val authorId: Long = 0,
 ) {
     fun toDto() = Post(
@@ -63,5 +62,4 @@ data class AttachmentEmbeddable (
 }
 
 fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
-fun List<Post>.toEntity(show: Boolean = true): List<PostEntity> = map(PostEntity::fromDto)
-    .map { it.copy(show = show) }
+fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)

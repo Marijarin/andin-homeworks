@@ -68,7 +68,7 @@ class PostViewModel @Inject constructor(
     fun loadPosts() = viewModelScope.launch{
         try {
             _dataState.value = FeedModelState.Loading
-            repository.data
+            //repository.data
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception){
             _dataState.value = FeedModelState.Error
@@ -77,8 +77,7 @@ class PostViewModel @Inject constructor(
     fun refresh() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState.Refreshing
-            //repository.checkNotSaved()
-            repository.data
+             //repository.data
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception){
             _dataState.value = FeedModelState.Error
@@ -144,15 +143,6 @@ class PostViewModel @Inject constructor(
             repository.removeById(id)
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception) {
-            _dataState.value = FeedModelState.Error
-        }
-    }
-    fun update()= viewModelScope.launch {
-        try {
-            _dataState.value = FeedModelState.Refreshing
-            repository.update()
-            _dataState.value = FeedModelState.Idle
-        }catch (e: Exception) {
             _dataState.value = FeedModelState.Error
         }
     }

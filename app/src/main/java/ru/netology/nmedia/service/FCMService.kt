@@ -40,7 +40,7 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        val userId = appAuth.state.value?.id
+        val userId = appAuth.state.value.id
         val recipient = gson.fromJson(message.data[content], MailOut::class.java).recipientId
 
         when (recipient) {

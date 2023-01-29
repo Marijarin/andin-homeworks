@@ -30,13 +30,10 @@ class LocalPostPagingSource(
                 is LoadParams.Prepend -> return LoadResult.Page(
                     data = emptyList(), nextKey = null, prevKey = params.key
                 )
-            }.catch { e -> throw AppError.from(e) }
-                .flowOn(Dispatchers.Default)
-
-
-            val nextKey = if (result.count() == 0) null else result.last().last().id
+            }
+            val nextKey = if (result.isEmpty()) null else result.last().id
             return LoadResult.Page(
-                data = result.stateIn(CoroutineScope(context = coroutineContext)).value.toDto(),
+                data = result.toDto(),
                 prevKey = params.key,
                 nextKey = nextKey,
             )

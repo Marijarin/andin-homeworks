@@ -117,7 +117,7 @@ class NewPostFragment : Fragment() {
         }
 
         viewModel.postCreated.observe(viewLifecycleOwner) {
-            viewModel.loadPosts()
+
             findNavController().navigateUp()
         }
         requireActivity().addMenuProvider(object : MenuProvider {

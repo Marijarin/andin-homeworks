@@ -4,21 +4,27 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
+import javax.inject.Inject
 import kotlin.random.Random
 
-
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "remote"
     private val gson = Gson()
 
+    @Inject
+    lateinit var appAuth: AppAuth
     override fun onCreate() {
         super.onCreate()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -34,16 +40,35 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        val userId = appAuth.state.value.id
+        val recipient = gson.fromJson(message.data[content], MailOut::class.java).recipientId
 
-        message.data[action]?.let {
-           when (Action.valueOf(it)) {
-              Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-           }
+        when (recipient) {
+            null, userId -> handleMessage(gson.fromJson(message.data[content], MailOut::class.java).content)
+            else -> appAuth.sendPushToken()
         }
     }
 
     override fun onNewToken(token: String) {
-        println(token)
+        appAuth.sendPushToken(token)
+    }
+
+    private fun handleMessage(message: String) {
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(
+                getString(
+                    R.string.fromServer,
+                    message)
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        NotificationManagerCompat.from(this)
+            .notify(Random.nextInt(100_000), notification)
+
+        Log.d("from server", message)
     }
 
     private fun handleLike(content: Like) {
@@ -73,5 +98,9 @@ data class Like(
     val userName: String,
     val postId: Long,
     val postAuthor: String,
+)
+data class MailOut(
+    val recipientId: Long?,
+    val content: String
 )
 

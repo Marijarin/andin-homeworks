@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "author": "NewStudent",
+    "authorAvatar": "@sample/posts_avatars",
+    "content": "Hello, it's 1st post",
+    "published": "now",
+    "likedByMe": false,
+    "likes": 100,
+    "attachment": null,
+    "show": true,
+    "authorId": 10
+  },
+  {
+    "id": 2,
+    "author": "NewStudent",
+    "authorAvatar": "@sample/posts_avatars",
+    "content": "Hello, it's 2nd post",
+    "published": "now",
+    "likedByMe": false,
+    "likes": 10,
+    "attachment": null,
+    "show": true,
+    "authorId": 10
+  },
+  {
+    "id": 3,
+    "author": "Student",
+    "authorAvatar": "@sample/posts_avatars",
+    "content": "Hello, it's 1st post",
+    "published": "now",
+    "likedByMe": false,
+    "likes": 10,
+    "attachment": null,
+    "show": true,
+    "authorId": 9
+  },
+  {
+    "id": 4,
+    "author": "Student",
+    "authorAvatar": "@sample/posts_avatars",
+    "content": "Hello, it's 2nd post",
+    "published": "now",
+    "likedByMe": false,
+    "likes": 10,
+    "attachment": null,
+    "show": true,
+    "authorId": 9
+  },
+  {
+    "id": 5,
+    "author": "NewestStudent",
+    "authorAvatar": "@sample/posts_avatars",
+    "content": "Hello, it's 1st post",
+    "published": "now",
+    "likedByMe": false,
+    "likes": 1,
+    "attachment": null,
+    "show": true,
+    "authorId": 8
+  },
+  {
+    "id": 6,
+    "author": "NewestStudent",
+    "authorAvatar": "@sample/posts_avatars",
+    "content": "Hello, it's 2nd post",
+    "published": "now",
+    "likedByMe": false,
+    "likes": 1,
+    "attachment": null,
+    "show": true,
+    "authorId": 8
+  }
+]

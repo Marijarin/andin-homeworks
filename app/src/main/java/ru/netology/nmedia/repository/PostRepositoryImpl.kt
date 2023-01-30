@@ -28,7 +28,7 @@ class PostRepositoryImpl @Inject constructor(
 
     ) : PostRepository {
     override val data = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
         pagingSourceFactory = postDao::pagingSource,
     ).flow.map { pagingData ->
         pagingData.map(PostEntity::toDto)

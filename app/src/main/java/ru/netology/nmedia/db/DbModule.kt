@@ -20,7 +20,7 @@ class DbModule {
         @ApplicationContext
         context: Context,
     ): AppDb = Room.databaseBuilder(context, AppDb::class.java, "app.db")
-        .createFromAsset("database/ForPosts.db")
+        .createFromAsset("database/app.db")
         .fallbackToDestructiveMigration()
         .build()
 

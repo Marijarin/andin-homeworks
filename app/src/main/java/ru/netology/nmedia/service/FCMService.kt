@@ -18,7 +18,7 @@ import kotlin.random.Random
 
 @AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
-    private val action = "action"
+
     private val content = "content"
     private val channelId = "remote"
     private val gson = Gson()
@@ -40,11 +40,16 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        val userId = appAuth.state.value?.id
+        val userId = appAuth.state.value.id
         val recipient = gson.fromJson(message.data[content], MailOut::class.java).recipientId
 
         when (recipient) {
-            null, userId -> handleMessage(gson.fromJson(message.data[content], MailOut::class.java).content)
+            null, userId -> handleMessage(
+                gson.fromJson(
+                    message.data[content],
+                    MailOut::class.java
+                ).content
+            )
             else -> appAuth.sendPushToken()
         }
     }
@@ -60,7 +65,8 @@ class FCMService : FirebaseMessagingService() {
             .setContentTitle(
                 getString(
                     R.string.fromServer,
-                    message)
+                    message
+                )
             )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
@@ -71,34 +77,7 @@ class FCMService : FirebaseMessagingService() {
         Log.d("from server", message)
     }
 
-    private fun handleLike(content: Like) {
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(
-                getString(
-                    R.string.notification_user_liked,
-                    content.userName,
-                    content.postAuthor,
-                )
-            )
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
-
-        NotificationManagerCompat.from(this)
-            .notify(Random.nextInt(100_000), notification)
-    }
 }
-
-enum class Action {
-    LIKE,
-}
-
-data class Like(
-    val userId: Long,
-    val userName: String,
-    val postId: Long,
-    val postAuthor: String,
-)
 data class MailOut(
     val recipientId: Long?,
     val content: String

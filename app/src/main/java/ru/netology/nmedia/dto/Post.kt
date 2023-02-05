@@ -1,9 +1,11 @@
 package ru.netology.nmedia.dto
 
-
+sealed interface FeedItem {
+    val id: Long
+}
 
 data class Post(
-    val id: Long,
+    override val id: Long,
     val author: String,
     val authorAvatar: String,
     val content: String,
@@ -13,7 +15,17 @@ data class Post(
     val attachment: Attachment?,
     val ownedByMe: Boolean = false,
     val authorId: Long = 0L,
-)
+): FeedItem
+
+data class Ad(
+    override val id: Long,
+    val image: String,
+): FeedItem
+
+data class Separator(
+    override val id: Long,
+    val description: String
+): FeedItem
 
 data class Attachment(
     val url: String,

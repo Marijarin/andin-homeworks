@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.net.Uri
+import android.text.method.DateTimeKeyListener
 import androidx.lifecycle.*
 import androidx.paging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
@@ -38,10 +40,12 @@ class PostViewModel @Inject constructor(
         .cachedIn(viewModelScope)
 
    @OptIn(ExperimentalCoroutinesApi::class)
-   val data: Flow<PagingData<Post>> = appAuth.state.flatMapLatest {(myId, _ )->
+   val data: Flow<PagingData<FeedItem>> = appAuth.state.flatMapLatest {(myId, _ )->
        cached.map { pagingData ->
            pagingData.map { post ->
-               post.copy(ownedByMe = post.authorId == myId)
+               if (post is Post) {
+                   post.copy(ownedByMe = post.authorId == myId)
+               } else post
            }
        }
    }
@@ -68,7 +72,6 @@ class PostViewModel @Inject constructor(
     fun loadPosts() = viewModelScope.launch{
         try {
             _dataState.value = FeedModelState.Loading
-            repository.getAll()
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception){
             _dataState.value = FeedModelState.Error
@@ -77,14 +80,12 @@ class PostViewModel @Inject constructor(
     fun refresh() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState.Refreshing
-            //repository.checkNotSaved()
             repository.getAll()
             _dataState.value = FeedModelState.Idle
         } catch (e: Exception){
             _dataState.value = FeedModelState.Error
         }
     }
-
 
     fun save() = viewModelScope.launch{
         edited.value?.let {
@@ -118,7 +119,6 @@ class PostViewModel @Inject constructor(
         edited.value = edited.value?.copy(content = text)
     }
 
-
     fun likeById(id: Long) = viewModelScope.launch{
         try {
             _dataState.value = FeedModelState.Refreshing
@@ -147,21 +147,12 @@ class PostViewModel @Inject constructor(
             _dataState.value = FeedModelState.Error
         }
     }
-    fun update()= viewModelScope.launch {
-        try {
-            _dataState.value = FeedModelState.Refreshing
-            repository.update()
-            _dataState.value = FeedModelState.Idle
-        }catch (e: Exception) {
-            _dataState.value = FeedModelState.Error
-        }
-    }
 
     fun changePhoto(uri: Uri?, file: File?) {
         _photo.value = PhotoModel(uri, file)
     }
 
-
-
-
+    fun convertDate(post: Post){
+        
+    }
 }

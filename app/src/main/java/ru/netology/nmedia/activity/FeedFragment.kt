@@ -2,11 +2,11 @@ package ru.netology.nmedia.activity
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.icu.lang.UCharacter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -44,7 +46,7 @@ class FeedFragment : Fragment() {
     ): View {
 
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-        
+
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
@@ -99,7 +101,15 @@ class FeedFragment : Fragment() {
             }
         }, appAuth)
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter {
+                adapter.retry()
+            },
+            footer = PostLoadingStateAdapter {
+                adapter.retry()
+            }
+        )
+
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest(adapter::submitData)
@@ -116,7 +126,7 @@ class FeedFragment : Fragment() {
             binding.contentView.isRefreshing = state is FeedModelState.Refreshing
             if (state is FeedModelState.Error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) { viewModel.refresh() }
+                    .setAction(R.string.retry_loading) { adapter.refresh() }
                     .show()
             }
         }
@@ -142,10 +152,10 @@ class FeedFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenCreated {
-            adapter.loadStateFlow.collectLatest {
-                it.refresh is LoadState.Loading
-                        || it.append is LoadState.Loading
-                        || it.prepend is LoadState.Loading
+            adapter.loadStateFlow.collectLatest { state ->
+                binding.contentView.isRefreshing =
+                    state.refresh is LoadState.Loading
+
             }
         }
 

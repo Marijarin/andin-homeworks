@@ -8,10 +8,19 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.databinding.CardAdBinding
 import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.databinding.ItemSeparatorBinding
+import ru.netology.nmedia.dto.Ad
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Separator
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -22,21 +31,74 @@ interface OnInteractionListener {
     fun onAuth() {}
 }
 
-class PostsAdapter (
+class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
     private val appAuth: AppAuth
-) : PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+) : PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostDiffCallback()) {
+    override fun getItemViewType(position: Int): Int =
+        when (getItem(position)) {
+            is Ad -> R.layout.card_ad
+            is Post -> R.layout.card_post
+            is Separator -> R.layout.item_separator
+            null -> error("unknown item type")
+        }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        when (viewType) {
+            R.layout.card_post -> {
+                val binding =
+                    CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                PostViewHolder(binding, onInteractionListener, appAuth)
+            }
+            R.layout.card_ad -> {
+                val binding =
+                    CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                AdViewHolder(binding)
+            }
+            R.layout.item_separator -> {
+                val binding =
+                    ItemSeparatorBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                SeparatorViewHolder(binding)
+            }
+            else -> error("unknown view type: $viewType")
+        }
 
 
-        return PostViewHolder(binding, onInteractionListener, appAuth)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is Ad -> (holder as? AdViewHolder)?.bind(item)
+            is Post -> (holder as? PostViewHolder)?.bind(item)
+            is Separator -> (holder as? SeparatorViewHolder)?.bind(item)
+            null -> error("unknown item type")
+        }
+
     }
+}
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position) ?: return
-        holder.bind(post)
+class SeparatorViewHolder(
+    private val binding: ItemSeparatorBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(separator: Separator) {
+        binding.apply {
+            separatorDescription.text = separator.description
+        }
+    }
+}
+
+
+class AdViewHolder(
+    private val binding: CardAdBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(ad: Ad) {
+        binding.apply {
+            Glide.with(image)
+                .load("${BuildConfig.BASE_URL}/media/${ad.image}")
+                .timeout(10_000)
+                .into(image)
+        }
     }
 }
 
@@ -46,21 +108,17 @@ class PostViewHolder(
     private val appAuth: AppAuth
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999"
-    }
-
     fun bind(post: Post) {
+
         binding.apply {
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
             Glide.with(avatar)
-                .load("${BASE_URL}/avatars/${post.authorAvatar}")
+                .load("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
                 .circleCrop()
                 .placeholder(R.drawable.ic_loading_24)
                 .error(R.drawable.ic_error_24)
@@ -70,7 +128,7 @@ class PostViewHolder(
             attachment.let {
                 if (post.attachment != null) {
                     Glide.with(attachment)
-                        .load("${BASE_URL}/media/${post.attachment.url}")
+                        .load("${BuildConfig.BASE_URL}/media/${post.attachment.url}")
                         .placeholder(R.drawable.ic_loading_24)
                         .error(R.drawable.ic_error_24)
                         .timeout(10_000)
@@ -104,7 +162,7 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if ( appAuth.state.value.id != 0L) {
+                if (appAuth.state.value.id != 0L) {
                     onInteractionListener.onLike(post)
                 } else if (appAuth.state.value.id == 0L) {
                     like.isChecked = false
@@ -121,12 +179,15 @@ class PostViewHolder(
     }
 }
 
-class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+class PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
+    override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
+        if (oldItem::class != newItem::class) {
+            return false
+        }
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+    override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
         return oldItem == newItem
     }
 }

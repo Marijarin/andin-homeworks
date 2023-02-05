@@ -1,47 +1,69 @@
 package ru.netology.nmedia.repository
 
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
+import androidx.paging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.ApiService
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
-import ru.netology.nmedia.dto.Attachment
-import ru.netology.nmedia.dto.Media
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 
 
 class PostRepositoryImpl @Inject constructor(
+    appDb: AppDb,
     private val postDao: PostDao,
+    postRemoteKeyDao: PostRemoteKeyDao,
     private val apiService: ApiService,
-    private val appAuth: AppAuth
 ) : PostRepository {
-    override val data = Pager(
-            config = PagingConfig( pageSize = 10, enablePlaceholders = false),
-            pagingSourceFactory = {
-                PostPagingSource(apiService)
+    @OptIn(ExperimentalPagingApi::class)
+    override val data: Flow<PagingData<FeedItem>> = Pager(
+        config = PagingConfig(pageSize = 5),
+        remoteMediator = PostRemoteMediator(apiService, appDb, postDao, postRemoteKeyDao),
+        pagingSourceFactory = postDao::pagingSource,
+    ).flow.map { pagingData ->
+        pagingData.map(PostEntity::toDto)
+            .insertSeparators { previous, next ->
+                when {
+                    next == null -> {
+                        return@insertSeparators null
+                    }
+                    previous == null -> {
+                        return@insertSeparators Separator(Random.nextLong(), "TODAY")
+                    }
+                    // ниже должно быть 1.0 - 1 день, но с другими цифрами можно увидеть все варианты
+                    diffInDays(previous) < 0.001 && diffInDays(next) >= 0.001 -> {
+                        Separator(Random.nextLong(), "YESTERDAY")
+                    }
+                    // ниже должно быть 2.0 - 2 дня, но с другими цифрами можно увидеть все варианты
+                    diffInDays(previous) < 0.0015 && diffInDays(next) >= 0.0015 -> {
+                        Separator(Random.nextLong(), "LAST WEEK")
+                    }
+                    else -> null
+                }
             }
-    )
-        .flow
-    private val idDone = 1_000_000_000L
+    }
+
     override suspend fun getAll() {
         try {
             val response = apiService.getAll()
@@ -174,6 +196,19 @@ class PostRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             throw  UnknownError
         }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    fun diffInDays(post: Post): Double {
+        val previousTimeStamp = post.published.toLong()
+        val nextTimeStamp = System.currentTimeMillis() / 1000
+        val difference = (nextTimeStamp - previousTimeStamp).toDouble()
+
+        return Duration.convert(
+            value = difference,
+            sourceUnit = DurationUnit.SECONDS,
+            targetUnit = DurationUnit.DAYS
+        )
     }
 
 }

@@ -1,26 +1,28 @@
 package ru.netology.nmedia.dao
 
-import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
-    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
-    fun getAll(): LiveData<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE show = 1 ORDER BY id DESC")
+    fun getAll(): Flow<List<PostEntity>>
 
-    @Insert
-    fun insert(post: PostEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(post: PostEntity)
 
-    @Insert
-    fun insert(posts: List<PostEntity>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(posts: List<PostEntity>)
 
     @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
-    fun updateContentById(id: Long, content: String)
+    suspend fun updateContentById(id: Long, content: String)
 
-    fun save(post: PostEntity) =
+    @Query("UPDATE PostEntity SET show = 1 ")
+    suspend fun update()
+
+    suspend fun save(post: PostEntity) =
         if (post.id == 0L) insert(post) else updateContentById(post.id, post.content)
 
     @Query("""
@@ -29,8 +31,14 @@ interface PostDao {
         likedByMe = CASE WHEN likedByMe THEN 0 ELSE 1 END
         WHERE id = :id
         """)
-    fun likeById(id: Long)
+    suspend fun likeById(id: Long)
 
     @Query("DELETE FROM PostEntity WHERE id = :id")
-    fun removeById(id: Long)
+    suspend fun removeById(id: Long)
+}
+class Converters {
+    @TypeConverter
+    fun toAttachmentType(value: String) = enumValueOf<AttachmentType>(value)
+    @TypeConverter
+    fun fromAttachmentType(value: AttachmentType) = value.name
 }

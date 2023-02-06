@@ -17,7 +17,7 @@
         android:enableOnBackInvokedCallback="true"
         >
         <activity
-            android:name=".activity.AppActivity"
+            android:name=".ui.AppActivity"
             android:exported="true">
             <nav-graph android:value="@navigation/nav_main" />
 

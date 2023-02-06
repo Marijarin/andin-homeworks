@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/feedFragment"
-        android:name="ru.netology.nmedia.activity.FeedFragment"
+        android:name="ru.netology.nmedia.ui.FeedFragment"
         android:label="fragment_feed"
         tools:layout="@layout/fragment_feed">
         <action
@@ -29,19 +29,19 @@
     </fragment>
     <fragment
         android:id="@+id/newPostFragment"
-        android:name="ru.netology.nmedia.activity.NewPostFragment"
+        android:name="ru.netology.nmedia.ui.NewPostFragment"
         android:label="fragment_new_post"
         tools:layout="@layout/fragment_new_post" />
     <fragment
         android:id="@+id/imageFragment"
-        android:name="ru.netology.nmedia.activity.ImageFragment"
+        android:name="ru.netology.nmedia.ui.ImageFragment"
         android:label="ImageFragment" />
     <dialog
         android:id="@+id/signInFragment"
-        android:name="ru.netology.nmedia.activity.SignInFragment"
+        android:name="ru.netology.nmedia.ui.SignInFragment"
         android:label="SignInFragment" />
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="ru.netology.nmedia.activity.SignUpFragment"
+        android:name="ru.netology.nmedia.ui.SignUpFragment"
         android:label="SignUpFragment" />
 </navigation>

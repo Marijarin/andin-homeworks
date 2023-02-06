@@ -12,6 +12,9 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -22,21 +25,46 @@ interface OnInteractionListener {
     fun onAuth() {}
 }
 
-class PostsAdapter (
+class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
     private val appAuth: AppAuth
 ) : PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
+    companion object {
+        const val TODAY_POST_ID = 1
+        const val YESTERDAY_POST_ID = 2
+        const val LAST_WEEK_POST_ID = 3
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-
-
         return PostViewHolder(binding, onInteractionListener, appAuth)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = getItem(position) ?: return
         holder.bind(post)
+    }
+
+    override fun getItemViewType(position: Int) =
+        when (getItem(position)?.let { diffInDays(it) }!!) {
+            in 0.0..0.01 -> TODAY_POST_ID
+            in 0.01..0.015 -> YESTERDAY_POST_ID
+            in 0.015..8.0 -> LAST_WEEK_POST_ID
+            else -> 0
+        }
+
+    @OptIn(ExperimentalTime::class)
+    fun diffInDays(post: Post): Double {
+        val previousTimeStamp = post.published.toLong()
+        val nextTimeStamp = System.currentTimeMillis() / 1000
+        val difference = (nextTimeStamp - previousTimeStamp).toDouble()
+
+        return Duration.convert(
+            value = difference,
+            sourceUnit = DurationUnit.SECONDS,
+            targetUnit = DurationUnit.DAYS
+        )
     }
 }
 
@@ -104,7 +132,7 @@ class PostViewHolder(
             }
 
             like.setOnClickListener {
-                if ( appAuth.state.value.id != 0L) {
+                if (appAuth.state.value.id != 0L) {
                     onInteractionListener.onLike(post)
                 } else if (appAuth.state.value.id == 0L) {
                     like.isChecked = false

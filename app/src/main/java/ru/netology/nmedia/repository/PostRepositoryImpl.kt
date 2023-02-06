@@ -41,7 +41,7 @@ class PostRepositoryImpl @Inject constructor(
             }
     )
         .flow
-    private val idDone = 1_000_000_000L
+
     override suspend fun getAll() {
         try {
             val response = apiService.getAll()
